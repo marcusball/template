@@ -18,4 +18,19 @@ class Session{
 		}
 		return FALSE;
 	}
+    
+    /*
+     * Wrapper for session_start(), with a check to make sure PHP sessions extension exists.
+     */
+    public static function startSession(){
+        if(function_exists('\session_start')){
+            session_start();
+        }
+        else{
+            //If we're not in a production environment
+            if(!IS_PRODUCTION){
+                \pirrs\Log::warning('PHP sessions appear to be disabled!');
+            }
+        }
+    }
 }

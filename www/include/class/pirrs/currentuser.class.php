@@ -1,5 +1,6 @@
 <?php
 namespace pirrs;
+use pirrs\utilities\Session;
 class CurrentUser extends User{	
 	private $_isLoggedIn = false; //If the user has been validated as being logged in.
 	private $_hasCheckedAuthentication = false; //If the class has checked yet whether the user is logged in. 
@@ -13,8 +14,8 @@ class CurrentUser extends User{
 	}
     
     public function initialize(){
-        if(utilities\Session::isSessionStarted() === false){
-			session_start();
+        if(Session::isSessionStarted() === false){
+			Session::startSession();
 		}
         
         $this->checkAuthentication();
