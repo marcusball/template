@@ -81,10 +81,13 @@ function parsePath($withQueryArgs = true){
 	//http://stackoverflow.com/questions/16388959/url-rewriting-with-php
 	$uri = rtrim( dirname($_SERVER['SCRIPT_NAME']), '/' );
     
-    $dirPos = strpos($_SERVER['REQUEST_URI'], $uri); //Get the position of the current file directory name in the url
-    if($dirPos !== false){
-        $uri = '/' . trim( substr_replace($_SERVER['REQUEST_URI'], '', $dirPos, strlen($uri)), '/' ); //Remove only the first occurrence of the current directory
-        //http://stackoverflow.com/a/1252710/451726
+    //Make sure $uri is not empty, to avoid "Empty needle" warning
+    if(isset($uri) && trim($uri) !== ''){
+        $dirPos = strpos($_SERVER['REQUEST_URI'], $uri); //Get the position of the current file directory name in the url
+        if($dirPos !== false){
+            $uri = '/' . trim( substr_replace($_SERVER['REQUEST_URI'], '', $dirPos, strlen($uri)), '/' ); //Remove only the first occurrence of the current directory
+            //http://stackoverflow.com/a/1252710/451726
+        }
     }
     
 	$uri = urldecode( $uri );
