@@ -52,7 +52,7 @@ class RequestHandler{
 			
 			$hasPhp = file_exists($includeFile);
 			$hasTemplate = file_exists($templateFile);
-			
+
 			if($hasPhp || $hasTemplate){
 				return array(($hasPhp)?$includeFile:false,($hasTemplate)?$templateFile:false);
 			}
@@ -67,7 +67,7 @@ class RequestHandler{
 	public function executeRequest($requestedPage){
         
 		list($requestedScript,$requestedTemplate) = $this->getRequestScript($requestedPage);
-		
+
 		if($requestedScript === false && $requestedTemplate === false){
 			$this->handleOutput(DefaultAPIResponses::NotFound());
 		}
@@ -318,7 +318,15 @@ function runPageLogicProcedure(){
 				(REQUEST_PHP_EXTENSION !== '.php' && $request === 'index.php') // The fun case of a non-'.php' extension,
 																			   // But with support for apache rewrite 'some.website/' compatibility.
 			){ $request = cleanPath('index'.REQUEST_PHP_EXTENSION); }
-
+            
+            //If request is a directory, search for the index
+            //@TODO: searching for index does not work if REQUEST_PHP_EXTENSION is ''
+            if(substr($request,-1) === '/'){
+                $request = cleanPath($request.'index'.REQUEST_PHP_EXTENSION);
+            }
+            
+            Log::debug($request);
+            
 			$Handler = new RequestHandler();
 			$Handler->setRequestArgs($requestArgs); //Args are any values pulled from named regex groups in configured rewrite rules.
 			$Handler->executeRequest($request);

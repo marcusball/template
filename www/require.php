@@ -104,11 +104,26 @@ function parsePath($withQueryArgs = true){
 
 function cleanPath($path){
 	if($path == '/') return $path;
+    $phpExt = str_replace('.','\.',REQUEST_PHP_EXTENSION); //Convert something like '.php' to '\.php'
 	
-	$phpExt = str_replace('.','\.',REQUEST_PHP_EXTENSION); //Convert something like '.php' to '\.php'
+	//Try to match against /some/path/to/file.php?querystuff=whatever,
+    //  with the desired match results containing the named group "path"
+    //  "path" should contain something like "/some/path/to/file", 
+    //  if there was a proper match with our configured php extension (".php" in this case)
 	$matchVal = preg_match('#^/?(?:(?\'path\'[^\?]+)'.$phpExt.')?(?:\?.*)?$#i',$path,$matches);
 	if($matchVal === 0 || $matchVal === false){
-		return false;
+        //If no valid file path was found, try for a directory path
+        $dirMatchVal = preg_match('#^/?(?:(?\'path\'[^\?]+))?(?:\?.*)?$#i',$path,$matches);
+        if($dirMatchVal === 0 || $dirMatchVal === false){
+            return false;
+        }
+        //If a path was found
+        if(isset($matches['path'])){
+            //Append a slash to indicate it's a directory
+            if(substr($matches['path'],-1) !== '/'){
+                $matches['path'] = $matches['path'] . '/';
+            }
+        }
 	}
 	
 	//If we get to here, we know the pattern matches
