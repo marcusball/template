@@ -80,6 +80,7 @@ function debug($message){
 function parsePath($withQueryArgs = true){
 	//http://stackoverflow.com/questions/16388959/url-rewriting-with-php
 	$uri = rtrim( dirname($_SERVER['SCRIPT_NAME']), '/' );
+    $uri = str_replace('\\','/',$uri); //Replace the windows directory character ('\') with a '/'
     
     //Make sure $uri is not empty, to avoid "Empty needle" warning
     if(isset($uri) && trim($uri) !== ''){
