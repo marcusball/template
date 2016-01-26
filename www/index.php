@@ -15,15 +15,18 @@ function runPageLogicProcedure(){
 	$path = parsePath(false);
 	$requestArgs = array();
 
-	if(($rewrite = getRewritePath($path)) !== false){ //If this requested URL is being handled as a rewrite page
-		list($file,$groups) = $rewrite; //Get the file system file name , and the regex groups from the regex that matched this request.
+	if(REWRITE_ENABLE){
+		if(($rewrite = getRewritePath($path)) !== false){ //If this requested URL is being handled as a rewrite page
+			list($file,$groups) = $rewrite; //Get the file system file name , and the regex groups from the regex that matched this request.
 
-		$path = $file; //Update the request path with the file system file (as defined in $REWRITE_RULES in config.php).
-		$requestArgs = array_merge($requestArgs,$groups);
-	}
+			$path = $file; //Update the request path with the file system file (as defined in $REWRITE_RULES in config.php).
+			$requestArgs = array_merge($requestArgs,$groups);
+		}
 
-	if($rewrite === false && REWRITE_ONLY){
-		OutputHandler::handleAPIOutput(DefaultAPIResponses::NotFound());
+		if($rewrite === false && REWRITE_ONLY){
+			OutputHandler::handleAPIOutput(DefaultAPIResponses::NotFound());
+			return;
+		}
 	}
 	else{
 		$request = cleanPath($path);
