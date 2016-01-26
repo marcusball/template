@@ -53,34 +53,6 @@ function init(){
 }
 
 /*
- * Here's a happy little log function.
- * Use it for errors.
- * $description is for a written description of the problem.
- * $error is for the output of error functions.
- * $debugIndex is the number of levels on the backtrace to use as the calling information.
- *      ex: When $debugIndex = 0, the file path that gets logged is the file in which "logError()" appears.
- *          While, when $debugIndex = 1, the file path that is logged is the file which called the function that contains logError()
- *          Note, if the value is higher than the level returned by debug_backtrace, then it will decrement this value until a valid level is found.
- */
-function logError($description, $error, $debugIndex = 1){
-	Log::warning('logError() is depreciated! Please use Log::error().');
-	Log::error($description, $error, $debugIndex);
-}
-
-/*
- * Nice little log function for warnings.
- * $description is for a written description of the problem.
- * $debugIndex is the number of levels on the backtrace to use as the calling information.
- *      ex: When $debugIndex = 0, the file path that gets logged is the file in which "logError()" appears.
- *          While, when $debugIndex = 1, the file path that is logged is the file which called the function that contains logError()
- *          Note, if the value is higher than the level returned by debug_backtrace, then it will decrement this value until a valid level is found.
- */
-function logWarning($description, $debugIndex = 1){
-	Log::warning('logWarning() is depreciated! Please use Log::warning().');
-	Log::warning($description, $debugIndex);
-}
-
-/*
  * Echo safe
  * Hopefully echos information in a way that is safe to echo
  */
