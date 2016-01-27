@@ -68,34 +68,6 @@ function debug($message){
 	}
 }
 
-function parsePath($withQueryArgs = true){
-	//http://stackoverflow.com/questions/16388959/url-rewriting-with-php
-	$uri = rtrim( dirname($_SERVER['SCRIPT_NAME']), '/' );
-    $uri = str_replace('\\','/',$uri); //Replace the windows directory character ('\') with a '/'
-
-    //Make sure $uri is not empty, to avoid "Empty needle" warning
-    $dirPos = strpos($_SERVER['REQUEST_URI'],'/'); //If $uri is empty, then we're at the root; assume position of first '/' slash.
-    if(isset($uri) && trim($uri) !== ''){
-        $dirPos = strpos($_SERVER['REQUEST_URI'], $uri); //Get the position of the current file directory name in the url
-    }
-
-    //trim out the current file system directory, so we have a completely relative path to the requested file
-    if($dirPos !== false){
-        $uri = '/' . trim( substr_replace($_SERVER['REQUEST_URI'], '', $dirPos, strlen($uri)), '/' ); //Remove only the first occurrence of the current directory
-        //http://stackoverflow.com/a/1252710/451726
-    }
-
-	$uri = urldecode( $uri );
-
-	if(!$withQueryArgs){
-		$matchVal = preg_match('#^(?\'path\'[^\?]*)(?:\?.*)?$#i',$uri,$matches);
-		if($matchVal !== 0 && $matchVal !== false){
-			return $matches['path'];
-		}
-	}
-	return $uri;
-}
-
 function cleanPath($path){
 	if($path == '/') return $path;
     $phpExt = str_replace('.','\.',REQUEST_PHP_EXTENSION); //Convert something like '.php' to '\.php'

@@ -12,7 +12,7 @@ require 'require.php';
  */
 function runPageLogicProcedure(){
 	//Just remember that, internally "bla.com/" will still be considered "bla.com/index.php" when checking the rewrite condition.
-	$path = parsePath(false);
+	$path = Request::parsePath($_SERVER['REQUEST_URI'], dirname($_SERVER['SCRIPT_NAME']), true);
 	$requestArgs = array();
 
 	if(REWRITE_ENABLE){
