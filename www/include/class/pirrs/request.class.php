@@ -204,8 +204,6 @@ class Request{
 		}
 	}
 
-
-
 	private function readMethod(){
 		if(isset($_SERVER['REQUEST_METHOD'])){
 			$method = trim(strtoupper($_SERVER['REQUEST_METHOD']));

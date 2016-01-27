@@ -15,11 +15,11 @@ function runPageLogicProcedure(){
 	$request = Request::createRequest($_SERVER['REQUEST_URI'], dirname($_SERVER['SCRIPT_NAME']), REWRITE_ENABLE, REWRITE_ONLY);
 	if($request !== false){
 			$Handler = new RequestHandler();
-			$Handler->setRequestArgs($request->args); //Args are any values pulled from named regex groups in configured rewrite rules.
-			$Handler->executeRequest($request->getPath());
+			$response = $Handler->execute($request);
+			OutputHandler::sendResponse($response);
 		}
 		else{
-			OutputHandler::handleAPIOutput(DefaultAPIResponses::NotFound());
+			OutputHandler::sendResponse(DefaultAPIResponses::NotFound());
 		}
 }
 

@@ -1,32 +1,32 @@
 <?php
 namespace pirrs;
 class RequestObject{
-    public $request;
+  public $request;
 	public $response;
-    
-	
+
+
 	protected $dbCon;
-    
-    public function __construct(){
-        $this->dbCon = ResourceManager::getDatabaseController();
-    }
-    
+
+  public function __construct(){
+      $this->dbCon = ResourceManager::getDatabaseController();
+  }
+
     /*
 	 * This function will be called before the template begins executing.
 	 */
 	public function preExecute(){}
-	
+
 	/*
 	 * This function will be called after the template has completed execution.
 	 */
 	public function postExecute(){}
-	
-	
+
+
 	public function executeGet(){ }
 	public function executePost(){ return $this->executeGet(); }
 	public function executePut(){ $this->response->setStatusCode(405); }
 	public function executeDelete(){ $this->response->setStatusCode(405);}
-    
+
     /*
      * Change the type of the response object for this request.
      * Creates a new response object of the class type that cooresponds
@@ -37,7 +37,7 @@ class RequestObject{
     protected function setResponseType($type){
         //Save the current response object
         $temp = $this->response;
-        
+
         //Create a new response object of the appropriate type
         switch($type){
             case(ResponseType::HTML):
@@ -52,7 +52,7 @@ class RequestObject{
 				$this->response = new APIResponse();
 				break;
 		}
-        
+
         //If a response type was actually present already
         if($temp != null){
             //Copy over the old data

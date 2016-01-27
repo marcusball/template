@@ -1,30 +1,50 @@
-<?php 
+<?php
 namespace pirrs;
 class Response{
 	public $headers;
 	protected $content = null;
 	protected $errors;
 	protected $statusCode = 200;
-	protected $statusCodeMes = "It Is A Mystery"; //If OutputHandler does not have a message associated with the returned $statusCode, it will read this. 
-	
+	protected $statusCodeMes = "It Is A Mystery"; //If OutputHandler does not have a message associated with the returned $statusCode, it will read this.
+
 	public $rawContent = false; //Set to true to disable json_encode-ing of $content
 	public $responseType;
-	
+
+	/**
+	 * The contents of ob_end_clean() after a response has been executed.
+	 */
+	protected $outputBuffer;
+
 	public function __construct(){
 		$this->headers = new ResponseHeaders();
 	}
-	
+
+	/**
+	 * Perform any actions that should be done before a request's page is executed.
+	 */
+	public static function preExecute(){
+		ob_start();
+	}
+
+	/**
+	 * Perform any actions that should be done after a request's page is executed.
+	 * @param $response The Response object on which these post-run processes should apply.
+	 */
+	public static function postExecute(self $response){
+		$response->outputBuffer = ob_get_clean();
+	}
+
 	/*
-	 * This is basically a copy constructor. 
+	 * This is basically a copy constructor.
 	 * Copies the data from $apiResponse into this.
-	 * Note: will overwrite headers, but will not delete 
+	 * Note: will overwrite headers, but will not delete
 	 *   existing headers that don't exist in the given $apiResponse.
      * This also does NOT copy the $responseType value.
 	 */
 	public function apply(Response $apiResponse,$forceOverwrite = false){
 		$this->headers->apply($apiResponse->headers);
 		$this->setStatusCode($apiResponse->getStatusCode(), $this->statusCodeMes);
-		
+
 		if($forceOverwrite || $apiResponse->hasContent()){
 			$this->setContent($apiResponse->getContent());
 		}
@@ -32,7 +52,7 @@ class Response{
 			$this->addErrors($apiResponse->getErrors());
 		}
 	}
-	
+
 	public function setStatusCode($code, $mes = null){
 		if($code >= 100 && $code < 600){
 			$this->statusCode = $code;
@@ -41,27 +61,34 @@ class Response{
 			}
 		}
 	}
-	
+
 	public function getStatusCode(){
 		return $this->statusCode;
 	}
-	
+
 	public function getStatusCodeMessage(){
 		return $this->statusCodeMes;
 	}
-	
+
 	public function setContent($content){
 		$this->content = $content;
 	}
-	
+
 	public function getContent(){
 		return $this->content;
 	}
-	
+
+	/**
+	 * Output buffer of anything that was printed during response execution.
+	 */
+	public function getOutputBuffer(){
+		return $this->outputBuffer;
+	}
+
 	public function hasContent(){
 		return isset($this->content) && $this->content != null;
 	}
-	
+
 	/*
 	 * Add a single error, $message.
 	 */
@@ -72,11 +99,11 @@ class Response{
 		if(is_array($message)){
 			return false;
 		}
-		
+
 		$this->errors[] = $message;
 		return true;
 	}
-	
+
 	/*
 	 * Add an array of errors, given by $messages
 	 */
@@ -89,15 +116,15 @@ class Response{
 		}
 		return true;
 	}
-	
+
 	public function getErrors(){
 		return $this->errors;
 	}
-	
+
 	public function hasErrors(){
 		return isset($this->errors) && count($this->errors) > 0;
 	}
-    
+
     /*
      * Forward to a different page, using a 302 redirect.
      * $url is the url to which to forward.

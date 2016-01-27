@@ -63,11 +63,19 @@ class RequestHandler{
 	 * @return An object of type Response.
    */
 	public function execute(Request $request){
+		Response::preExecute();
+		$response = $this->executePrivate($request);
+		Response::postExecute($response);
+
+		return $response;
+	}
+
+	private function executePrivate(Request $request){
 		//Find either a template, a PageObject script, or both, to handle this request
 		list($requestedScript,$requestedTemplate) = $this->getRequestScript($request->GetPath());
 
 		//If there does not exist either a script or a template, then we have no handlers for this request
-		if($requestedScript === false || $requestedTemplate === false){
+		if($requestedScript === false && $requestedTemplate === false){
 			//Therefore, we return 404.
 			return DefaultAPIResponses::NotFound();
 		}
@@ -83,17 +91,16 @@ class RequestHandler{
 				$requestClass = $this->getPageFunctionClass(__NAMESPACE__.'\\'.PAGE_REQUEST_CLASS_PARENT);
 				if($requestClass === false){ //Test for Page
 					$this->executeWithoutPage($requestedTemplate); //Instead of dying, let's just display the template.
-					return;
+					return DefaultResponses::Success();
 				}
 				else{
 					//Okay, time to display a page
 					//pageFunctionObject will be of type PageObject
 					$this->pageFunctionObject = new $requestClass(); //Instantiate our page handling object
-					$this->pageFunctionObject->request->setArgs($this->reqArgs);
+					$this->pageFunctionObject->request->setArgs($request->args);
 
 					if(call_user_func(array($this->pageFunctionObject,REQUEST_FUNC_REQUIRE_LOGGED_IN)) === true && !$this->user->isLoggedIn()){ //If the user must be logged in to view this page, and the user is not logged in
-						$this->handleOutput(DefaultResponses::Unauthorized()); //not authorized
-						return;
+						return DefaultResponses::Unauthorized(); //not authorized
 					}
 					else{
 						$preexResult = call_user_func(array($this->pageFunctionObject,REQUEST_FUNC_PRE_EXECUTE)); //Call the page specific pre-execution function.
@@ -133,14 +140,13 @@ class RequestHandler{
 				//respond to an API request
 				//pageFunctionObject will be of type APIObject
 				$this->pageFunctionObject = new $requestClass(); //Instantiate our page handling object
-				$this->pageFunctionObject->request->setArgs($this->reqArgs);
+				$this->pageFunctionObject->request->setArgs($request->args);
 
 				$this->interalPreExecute(); //Call the global RequestHandler pre-execution function. Take care of anything that should happen before the page begins loading.
 				$preexResult = call_user_func(array($this->pageFunctionObject,REQUEST_FUNC_PRE_EXECUTE)); //Call the page specific pre-execution function.
 
         if(call_user_func(array($this->pageFunctionObject,REQUEST_FUNC_REQUIRE_LOGGED_IN)) === true && !$this->user->isLoggedIn()){ //If the user must be logged in to view this page, and the user is not logged in
-            $this->handleOutput(DefaultResponses::Login()); //not authorized
-            return;
+            return DefaultResponses::Login(); //not authorized
         }
         else{
             if($preexResult !== false){ //If preExecute() returns false, cancel loading of template
@@ -164,11 +170,12 @@ class RequestHandler{
         }
 			}
 			$this->internalPostExecute(); //Call the global RequestHandler postExecute function. Perform any tasks we want to always occur after processing, but before sending output.
-			$this->handleOutput($this->pageFunctionObject->response);
+			return $this->pageFunctionObject->response;
 		}
 		else{ //Since we know we have either the script or the template, then, here, we must have only the template.
 			$this->requestType = RequestType::HTML;
 			$this->executeWithoutPage($requestedTemplate);
+			return DefaultResponses::Success();
 		}
 	}
 
@@ -220,25 +227,6 @@ class RequestHandler{
 	 */
 	private function internalPostExecute(){
 		$this->pageFunctionObject->response->headers->set('X-XRDS-Location',sprintf('http://%s/xrds.xml',$_SERVER['SERVER_NAME']));
-	}
-
-	private function handleOutput(Response $output){
-		switch($output->responseType){
-			case(ResponseType::RAW):
-				OutputHandler::handleRawOutput($output);
-				break;
-			case(ResponseType::API):
-				OutputHandler::handleAPIOutput($output);
-				break;
-            		case(ResponseType::PAGE):
-			default:
-				OutputHandler::handlePageOutput($output);
-				break;
-		}
-	}
-
-	private function unexpectedError(){
-		$this->handleOutput(DefaultAPIResponses::ServerError());
 	}
 
 	private function includePageFile($file, $templateRequestHandler){
