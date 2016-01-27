@@ -13,7 +13,7 @@ $REWRITE_RULES = array(
 );
 
 //Whether or not rewriting should be attempted at all.
-define('REWRITE_ENABLE',false);
+define('REWRITE_ENABLE',true);
 //ONLY allow pages to be accessed if they're in the rewrite rules.
 //  will be ignored if REWRITE_ENABLE is FALSE. 
 define('REWRITE_ONLY',false);

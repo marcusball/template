@@ -18,13 +18,18 @@ class Session{
 		}
 		return FALSE;
 	}
-    
+
     /*
      * Wrapper for session_start(), with a check to make sure PHP sessions extension exists.
      */
     public static function startSession(){
         if(function_exists('\session_start')){
-            session_start();
+						if(!headers_sent()){
+            	session_start();
+						}
+						else{
+							\pirrs\Log::warning('Cannot start user session because headers have already been sent!');
+						}
         }
         else{
             //If we're not in a production environment

@@ -12,39 +12,15 @@ require 'require.php';
  */
 function runPageLogicProcedure(){
 	//Just remember that, internally "bla.com/" will still be considered "bla.com/index.php" when checking the rewrite condition.
-	$path = Request::parsePath($_SERVER['REQUEST_URI'], dirname($_SERVER['SCRIPT_NAME']), true);
-	$requestArgs = array();
-
-	if(REWRITE_ENABLE){
-		if(($rewrite = getRewritePath($path)) !== false){ //If this requested URL is being handled as a rewrite page
-			list($file,$groups) = $rewrite; //Get the file system file name , and the regex groups from the regex that matched this request.
-
-			$path = $file; //Update the request path with the file system file (as defined in $REWRITE_RULES in config.php).
-			$requestArgs = array_merge($requestArgs,$groups);
-		}
-
-		if($rewrite === false && REWRITE_ONLY){
-			OutputHandler::handleAPIOutput(DefaultAPIResponses::NotFound());
-			return;
-		}
-	}
-	else{
-		$request = Request::cleanPath($path);
-		if($request === false){
-			OutputHandler::handleAPIOutput(DefaultAPIResponses::NotFound());
+	$request = Request::createRequest($_SERVER['REQUEST_URI'], dirname($_SERVER['SCRIPT_NAME']), REWRITE_ENABLE, REWRITE_ONLY);
+	if($request !== false){
+			$Handler = new RequestHandler();
+			$Handler->setRequestArgs($request->args); //Args are any values pulled from named regex groups in configured rewrite rules.
+			$Handler->executeRequest($request->getPath());
 		}
 		else{
-      //If request is a directory, search for the index
-      //@TODO: searching for index does not work if REQUEST_PHP_EXTENSION is ''
-      if(substr($request,-1) === '/'){
-          $request = Request::cleanPath($request.'index'.REQUEST_PHP_EXTENSION);
-      }
-
-			$Handler = new RequestHandler();
-			$Handler->setRequestArgs($requestArgs); //Args are any values pulled from named regex groups in configured rewrite rules.
-			$Handler->executeRequest($request);
+			OutputHandler::handleAPIOutput(DefaultAPIResponses::NotFound());
 		}
-	}
 }
 
 /*

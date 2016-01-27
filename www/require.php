@@ -44,12 +44,14 @@ function init(){
 	//Initialize the logging object
 	$logOverrides = array();
 	if(defined('SERVER_LOG_PATH_ERRORS')){
-		$logOverrides['error'] = SERVER_LOG_PATH_ERRORS;
+		$logOverrides['error'] = dirname(__FILE__) . SERVER_LOG_PATH_ERRORS;
 	}
 	if(defined('SERVER_LOG_PATH_WARNINGS')){
-		$logOverrides['warning'] = SERVER_LOG_PATH_WARNINGS;
+		$logOverrides['warning'] = dirname(__FILE__) . SERVER_LOG_PATH_WARNINGS;
 	}
-	Log::construct(SERVER_LOG_PATH,$logOverrides);
+
+	$logPath = dirname(__FILE__) . SERVER_LOG_PATH;
+	Log::construct($logPath,$logOverrides);
 }
 
 /*
@@ -66,30 +68,6 @@ function debug($message){
 	else{
 		echo $message . '<br />';
 	}
-}
-
-function getRewritePath($path){
-	global $REWRITE_RULES; //get rewrite rules from config.php
-	foreach($REWRITE_RULES as $file=>$rule){
-		if($file != null && $rule != null){ //If there is a full rewrite rule; "file.php" => "/some/rewrite/rule"
-			$match = preg_match('#'.$rule.'#i',$path,$matches);
-			if($match !== 0 && $match !== false){
-				return array($file,$matches);
-			}
-		}
-		else{ //Otherwise
-			if($rule === null){ //in the case of: "file.php" => null
-				if($path == $file || $path == '/'.$file || ($path === '/' && $file === 'index.php')){ //if path == "file.php" OR path == "/file.php" OR (path == / and file is "index.php")
-					return array($file,array());
-				}
-			}
-		}
-	}
-	return false;
-}
-
-function getCurrentUrl($withQueryArgs = true){
-	return parsePath($withQueryArgs);
 }
 
 /*

@@ -67,4 +67,26 @@ public function testParsePathRootWithParams(){
 
       $this->assertEquals(Request::cleanPath('/index'.REQUEST_PHP_EXTENSION.'?test=true&false'), 'index');
     }
+
+    public function testDirectory(){
+      $this->assertEquals(Request::cleanPath('/subdirectory/'),'subdirectory/index');
+
+      $this->assertEquals(Request::cleanPath('/subdirectory/index'.REQUEST_PHP_EXTENSION),'subdirectory/index');
+
+      $this->assertEquals(Request::cleanPath('/subdirectory/test'.REQUEST_PHP_EXTENSION),'subdirectory/test');
+
+      $this->assertEquals(Request::cleanPath('/subdirectory/nested/'),'subdirectory/nested/index');
+    }
+
+    public function testRequestIndex(){
+      //Simple tests of requesting the index page
+      {
+        $request = Request::createRequest('index.php', '/', false);
+        $this->assertEquals($request->getPath(), 'index');
+      }
+      {
+        $request = Request::createRequest('/', '/', false);
+        $this->assertEquals($request->getPath(), 'index');
+      }
+    }
 } ?>

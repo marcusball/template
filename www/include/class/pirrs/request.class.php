@@ -1,11 +1,17 @@
 <?php
 namespace pirrs;
 class Request{
-	private $args;
-	private $method;
-	private $req;
+	public $args;
+	protected $method;
+	protected $req;
 
 	public $user;
+
+	/**
+	 * The stripped path to the resource being requested.
+	 * @example "index" or "path/to/file"
+	 */
+	protected $path;
 
 	private static $methodMap = array(
 		'GET' => RequestMethod::GET,
@@ -103,19 +109,28 @@ class Request{
 			//So, if we have a path returned from the regex, then the url is something like "/xxxxx.php?ffffff"
 			//Otherwise the path is "/?ffffff".
 			if(isset($matches['path'])){
+				$foundPath = $matches['path'];
 				//If '.php' is still present, then REQUEST_PHP_EXTENSION is probably != '.php'
 				//  however, index.php still needs to be handled correctly for rewrites,
 				//  If this condition is false (that is, if the path == 'index.php'),
-				//  then we will fall through to return the default 'index' value. 
-				if($matches['path'] !== 'index.php'){
-					return $matches['path'];
+				//  then we will fall through to return the default 'index' value.
+				if($foundPath !== 'index.php'){
+					//If request is a directory, search for the index
+		      if(substr($foundPath,-1) !== '/'){
+						return $foundPath;
+		      }
+					else{
+						//If the value of the path found is a directory (Eg: "path/to/directory/"),
+						//  then we're looking for the index of said directory.
+						return $foundPath . "index";
+					}
 				}
 			}
 		}
 		return $index;
 	}
 
-	public function getRewritePath($path){
+	public static function getRewritePath($path){
 		global $REWRITE_RULES; //get rewrite rules from config.php
 		foreach($REWRITE_RULES as $file=>$rule){
 			if($file != null && $rule != null){ //If there is a full rewrite rule; "file.php" => "/some/rewrite/rule"
@@ -135,17 +150,69 @@ class Request{
 		return false;
 	}
 
-	public function getCurrentUrl($withQueryArgs = true){
-		return $this->parsePath($withQueryArgs);
+	/**
+	 * Get the actual URL path that was requested for this page.
+	 * @param $withQueryArgs When FALSe, GET data (anything including and after the '?' symbol) will be removed.
+	 * @return a string, similar to "/install/path/to/file.php" or "/some/request.php?query=data"
+	 */
+	public static function getCurrentUrl($withQueryArgs = true){
+		return self::parsePath($_SERVER['REQUEST_URI'], '/', $withQueryArgs);
+	}
+
+	/**
+	 * Construct a new request object for the given @requestUri.
+	 * @param $requestUri Should be the value of $_SERVER['REQUEST_URI'],
+	 *   expected input in the format "/request/path/file.php?any=url-data".
+	 * @param $webrootDirectoy Path to the directory representing the
+	 *   root directory of _this_ application.
+	 *   Should be the result of `dirname($_SERVER['SCRIPT_NAME'])` when
+	 *   called from a script in the www directory.
+	 * @param $bEnableRewrite When TRUE, will test for and attempt to handle possible rewrite paths
+	 * @param $bRewriteOnly When TRUE and @bEnableRewrite is TRUE, requests will only succeed
+	 *   if they are rewritten URLs. All others will be rejected.
+	 * @return a new Request object, or FALSE on "Not Found".
+	 */
+	public static function createRequest($requestUri, $webrootDirectoy = '/', $bEnableRewrite = true, $bRewriteOnly = false){
+		//Just remember that, internally "bla.com/" will still be considered "bla.com/index.php" when checking the rewrite condition.
+		$path = self::parsePath($requestUri, $webrootDirectoy, true);
+		$requestArgs = array();
+
+		if($bEnableRewrite){
+			if(($rewrite = self::getRewritePath($path)) !== false){ //If this requested URL is being handled as a rewrite page
+				list($file,$groups) = $rewrite; //Get the file system file name , and the regex groups from the regex that matched this request.
+
+				$path = $file; //Update the request path with the file system file (as defined in $REWRITE_RULES in config.php).
+				$requestArgs = array_merge($requestArgs,$groups);
+			}
+
+			if($rewrite === false && $bRewriteOnly){
+				//OutputHandler::handleAPIOutput(DefaultAPIResponses::NotFound());
+				return false;
+			}
+		}
+
+		$request = self::cleanPath($path);
+		if($request === false){
+			//OutputHandler::handleAPIOutput(DefaultAPIResponses::NotFound());
+			return false;
+		}
+		else{
+				$requestObject = new self();
+				$requestObject->path = $request;
+				$requestObject->args = $requestArgs;
+				return $requestObject;
+		}
 	}
 
 
 
 	private function readMethod(){
-		$method = trim(strtoupper($_SERVER['REQUEST_METHOD']));
+		if(isset($_SERVER['REQUEST_METHOD'])){
+			$method = trim(strtoupper($_SERVER['REQUEST_METHOD']));
 
-		if(isset(self::$methodMap[$method])){
-			return self::$methodMap[$method];
+			if(isset(self::$methodMap[$method])){
+				return self::$methodMap[$method];
+			}
 		}
 		return RequestMethod::GET;
 	}
@@ -360,12 +427,20 @@ class Request{
      * Get the current url, encoded in a safely-printable fashion.
      * $append: extra data to append to the url (optional).
      */
-    public function getSafeUrl($append = null){
+  public function getSafeUrl($append = null){
 		$url = getCurrentUrl();
 		if($append !== null){
 			$url .= $append;
 		}
 		return htmlentities(urlencode($url));
+	}
+
+	/**
+	 * @return The path of the resource being requested. Eg: "path/to/file"
+	 * @see getCurrentUrl() if you would like the actual request url.
+	 */
+	public function getPath() {
+		return $this->path;
 	}
 }
 ?>
