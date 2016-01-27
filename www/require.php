@@ -68,42 +68,6 @@ function debug($message){
 	}
 }
 
-function cleanPath($path){
-	if($path == '/') return $path;
-    $phpExt = str_replace('.','\.',REQUEST_PHP_EXTENSION); //Convert something like '.php' to '\.php'
-
-	//Try to match against /some/path/to/file.php?querystuff=whatever,
-    //  with the desired match results containing the named group "path"
-    //  "path" should contain something like "/some/path/to/file",
-    //  if there was a proper match with our configured php extension (".php" in this case)
-	$matchVal = preg_match('#^/?(?:(?\'path\'[^\?]+)'.$phpExt.')?(?:\?.*)?$#i',$path,$matches);
-	if($matchVal === 0 || $matchVal === false){
-        //If no valid file path was found, try for a directory path
-        $dirMatchVal = preg_match('#^/?(?:(?\'path\'[^\?]+))?(?:\?.*)?$#i',$path,$matches);
-        if($dirMatchVal === 0 || $dirMatchVal === false){
-            return false;
-        }
-        //If a path was found
-        if(isset($matches['path'])){
-            //Append a slash to indicate it's a directory
-            if(substr($matches['path'],-1) !== '/'){
-                $matches['path'] = $matches['path'] . '/';
-            }
-        }
-	}
-
-	//If we get to here, we know the pattern matches
-	//If path is not set, then nothing exists between the first character ('/'), and the query string ('?...')
-	//So, if we have a path returned from the regex, then the url is something like "/xxxxx.php?ffffff"
-	//Otherwise the path is "/?ffffff".
-	if(isset($matches['path'])){
-		return $matches['path'];
-	}
-	else{
-		return '/';
-	}
-}
-
 function getRewritePath($path){
 	global $REWRITE_RULES; //get rewrite rules from config.php
 	foreach($REWRITE_RULES as $file=>$rule){

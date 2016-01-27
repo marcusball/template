@@ -56,4 +56,15 @@ public function testParsePathRootWithParams(){
       //Request to root index file, with query params preserved
       $this->assertEquals(Request::parsePath('/subdirectory/index.php?test=true&false','/subdirectory',true),'/index.php?test=true&false');
     }
+
+    public function testCleanPathRoot(){
+      $this->assertEquals(Request::cleanPath(''), 'index');
+      $this->assertEquals(Request::cleanPath('/'), 'index');
+
+      $this->assertEquals(Request::cleanPath('/index.php'), 'index'); //Needs to be here in case REQUEST_PHP_EXTENSION is != '.php'
+
+      $this->assertEquals(Request::cleanPath('/index'.REQUEST_PHP_EXTENSION), 'index');
+
+      $this->assertEquals(Request::cleanPath('/index'.REQUEST_PHP_EXTENSION.'?test=true&false'), 'index');
+    }
 } ?>

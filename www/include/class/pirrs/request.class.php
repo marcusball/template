@@ -64,40 +64,55 @@ class Request{
 		return $uri;
 	}
 
-	public function cleanPath($path){
-		if($path == '/') return $path;
-	    $phpExt = str_replace('.','\.',REQUEST_PHP_EXTENSION); //Convert something like '.php' to '\.php'
+	/**
+	 * Take a given @path and strip REQUEST_PHP_EXTENSION, preceding slash,
+	 *   and anything other than path to file.
+	 * @example "/path/to/file.php?example=true" => "path/to/file"
+	 * @param $path The path to clean
+	 * @param $index The default "home" return value, which will be used
+	 *   for empty @path values, or results that would equal '/'.
+	 */
+	public static function cleanPath($path, $index = 'index'){
+		if($path !== '/' && $path != ''){
 
-		//Try to match against /some/path/to/file.php?querystuff=whatever,
-	    //  with the desired match results containing the named group "path"
-	    //  "path" should contain something like "/some/path/to/file",
-	    //  if there was a proper match with our configured php extension (".php" in this case)
-		$matchVal = preg_match('#^/?(?:(?\'path\'[^\?]+)'.$phpExt.')?(?:\?.*)?$#i',$path,$matches);
-		if($matchVal === 0 || $matchVal === false){
-	        //If no valid file path was found, try for a directory path
-	        $dirMatchVal = preg_match('#^/?(?:(?\'path\'[^\?]+))?(?:\?.*)?$#i',$path,$matches);
-	        if($dirMatchVal === 0 || $dirMatchVal === false){
-	            return false;
-	        }
-	        //If a path was found
-	        if(isset($matches['path'])){
-	            //Append a slash to indicate it's a directory
-	            if(substr($matches['path'],-1) !== '/'){
-	                $matches['path'] = $matches['path'] . '/';
-	            }
-	        }
-		}
+			//Convert the extension into something regex-safe (Escape the periods).
+		  $phpExtRegex = str_replace('.','\.',REQUEST_PHP_EXTENSION); //Convert something like '.php' to '\.php'
 
-		//If we get to here, we know the pattern matches
-		//If path is not set, then nothing exists between the first character ('/'), and the query string ('?...')
-		//So, if we have a path returned from the regex, then the url is something like "/xxxxx.php?ffffff"
-		//Otherwise the path is "/?ffffff".
-		if(isset($matches['path'])){
-			return $matches['path'];
+			//Try to match against /some/path/to/file.php?querystuff=whatever,
+		    //  with the desired match results containing the named group "path"
+		    //  "path" should contain something like "/some/path/to/file",
+		    //  if there was a proper match with our configured php extension (".php" in this case)
+			$matchVal = preg_match('#^/?(?:(?\'path\'[^\?]+)'.$phpExtRegex.')?(?:\?.*)?$#i',$path,$matches);
+			if($matchVal === 0 || $matchVal === false){
+		        //If no valid file path was found, try for a directory path
+		        $dirMatchVal = preg_match('#^/?(?:(?\'path\'[^\?]+))?(?:\?.*)?$#i',$path,$matches);
+		        if($dirMatchVal === 0 || $dirMatchVal === false){
+		            return false;
+		        }
+		        //If a path was found
+		        if(isset($matches['path'])){
+		            //Append a slash to indicate it's a directory
+		            if(substr($matches['path'],-1) !== '/'){
+		                $matches['path'] = $matches['path'] . '/';
+		            }
+		        }
+			}
+
+			//If we get to here, we know the pattern matches
+			//If path is not set, then nothing exists between the first character ('/'), and the query string ('?...')
+			//So, if we have a path returned from the regex, then the url is something like "/xxxxx.php?ffffff"
+			//Otherwise the path is "/?ffffff".
+			if(isset($matches['path'])){
+				//If '.php' is still present, then REQUEST_PHP_EXTENSION is probably != '.php'
+				//  however, index.php still needs to be handled correctly for rewrites,
+				//  If this condition is false (that is, if the path == 'index.php'),
+				//  then we will fall through to return the default 'index' value. 
+				if($matches['path'] !== 'index.php'){
+					return $matches['path'];
+				}
+			}
 		}
-		else{
-			return '/';
-		}
+		return $index;
 	}
 
 	public function getRewritePath($path){
