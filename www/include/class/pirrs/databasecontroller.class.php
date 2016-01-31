@@ -2,32 +2,32 @@
 namespace pirrs;
 use \PDO;
 
-class DatabaseController{
+class DatabaseController implements iDatabaseController{
 	private $_sqlCon; //DO NOT ACCESS DIRECTLY! Use $this->sqlCon()
-	// add other private database connections here	
+	// add other private database connections here
 	public function __construct(){
 	}
 	public function setPDOAttribute($attribute,$value){
 		return $this->sqlCon()->setAttribute($attribute,$value);
 	}
-	
+
 	public static function getSQLTimeStamp($time = null){
 		if($time == null) $time = time();
 		return date('Y-m-d H:i:s',$time);
 	}
-	
+
 	public function getSQLConnection(){
 		return $this->sqlCon();
 	}
-	
+
 	private function sqlCon(){
 		if($this->_sqlCon == null){
 			$this->_sqlCon = new PDO(DB_PDO_NAME.':host='.DB_HOST.';dbname='.DB_NAME, DB_USER, DB_PASSWORD, null);
 		}
 		return $this->_sqlCon;
 	}
-	
-	/* 
+
+	/*
 	 * Add other private databaseConnect functions here
 	 * Return the connection object, then save to private member.
 	 */
@@ -36,17 +36,24 @@ class DatabaseController{
 	/* DO NOT MODIFY THE CODE ABOVE THIS SECTION               */
 	/* Add in your own database access methods below this point*/
 	/***********************************************************/
-	
-	
+
+
 	/***********************************************************/
 	/* Registration and Authentication methods                 */
 	/***********************************************************/
-	
+
+	/**
+	 * Check if a given user ID, $uid, is valid
+	 *   and registered in the database.
+	 * @param $uid The user ID to check.
+	 * @return TRUE if a user exists in the database
+	 *   registered with this user id, FALSE otherwise.
+	 */
 	public function isValidUid($uid){
 		try{
 			$uidCheck = $this->sqlCon()->prepare('SELECT uid FROM users WHERE uid=:uid');
 			$uidCheck->execute(array(':uid'=>$uid));
-			
+
 			if(($uidReturn = $uidCheck->fetch(PDO::FETCH_ASSOC)) !== false){
 				if($uidReturn['uid'] == $uid){
 					return true;
@@ -58,10 +65,10 @@ class DatabaseController{
 		}
 		return false;
 	}
-	
-	/*
-	 * Checks if a user is currently registered with this email address 
-	 * Returns 1 if email exists, 0 if email does not exist, false on error
+
+	/**
+	 * Checks if a user is currently registered with this email address
+	 * @return 1 if email exists, 0 if email does not exist, FALSE on error
 	 */
 	public function checkIfEmailExists($email){
 		$val = $this->getUidFromEmail($email);
@@ -70,24 +77,24 @@ class DatabaseController{
 		}
 		return false;
 	}
-	
-	/*
+
+	/**
 	 * Registers a new user.
-	 * Returns false on error, or an int representing the user's UID on success.
+	 * @return FALSE on error, or an int representing the user's UID on success.
 	 */
 	public function registerNewUser($fullName,$email,$password){
 		$passwordHash = password_hash($password.PASSWORD_SALT, PASSWORD_BCRYPT, array("cost" => AUTH_HASH_COMPLEXITY));
 		$nowDatetime = self::getSQLTimeStamp();
 		try{
-			$this->sqlCon()->beginTransaction(); //Registering a new user means a lot of different inserts, so we want to make sure either all or nothing occurs. 
-			
-			
+			$this->sqlCon()->beginTransaction(); //Registering a new user means a lot of different inserts, so we want to make sure either all or nothing occurs.
+
+
 			//Let's insert the user into the user table
 			$regStatement = $this->sqlCon()->prepare($insertQuery);
 			$regStatement->execute(array(':email'=>$email,':fullname'=>$fullName,':password'=>$passwordHash));
-			
+
 			$this->sqlCon()->commit();
-			
+
 			$uidValue = $this->getUidFromEmail($email); //get the ID we just inserted, because lastInsertId can be weird sometimes.
 		}
 		catch(PDOException $e){
@@ -95,17 +102,17 @@ class DatabaseController{
 			logError("An error occurred while registering a new user! Code: {$e->getCode()}.",$e->getMessage());
 			return false;
 		}
-		
+
 		//If the uidValue is valid
 		if($uidValue > 0 && $uidValue != false){
 			return $uidValue;
 		}
 		return false;
 	}
-	
-	/*
+
+	/**
 	 * Changes a users password
-	 * returns true on successful update, false otherwise.
+	 * @return TRUE on successful update, FALSE otherwise.
 	 */
 	public function changeUserPassword($uid,$newPassword){
 		$passwordHash = password_hash($newPassword.PASSWORD_SALT, PASSWORD_BCRYPT, array('cost' => AUTH_HASH_COMPLEXITY));
@@ -118,26 +125,26 @@ class DatabaseController{
 		}
 		catch(PDOException $e){
 			logError('databasecontroller.php',__LINE__,'Error while trying to update user\'s password!',$e->getMessage,time(),false);
-			
+
 		}
 		return false;
 	}
-	
-	/*
+
+	/**
 	 * Checks whether a user's login credentials are valid
-	 * $email: The user's email address
-	 * $password: the user's unhashed password
-	 * Returns false on error, user's UID on valid credentials (uid > 0), 0 on invalid credentials
+	 * @param $email The user's email address
+	 * @param $password the user's unhashed password
+	 * @return FALSE on error, user's UID on valid credentials (uid > 0), 0 on invalid credentials
 	 */
 	public function isValidLogin($email, $password){
 		$uid = $this->getUidFromEmail($email);
 		if($uid === 0 || $uid === false){ // Invalid email, or an error occurred
-			return $uid; 
+			return $uid;
 		}
-		
+
 		return $this->isValidPassword($uid,$password);
-	}	
-	
+	}
+
 	/*
 	 * Checks whether a user's login credentials are valid
 	 * $email: The user's email address
@@ -157,14 +164,14 @@ class DatabaseController{
 			logError("Could not check user's login credentials. Code: {$e->getCode()}. UID: \"{$uid}\"");
 			return false;
 		}
-		
+
 		/** We've gotten the result of the query, now we need to validate **/
 		if($loginResult === false || $loginResult == null){
 			return 0;
 			// Email was wrong, but we don't tell the
-			// user as this information could be exploited 
+			// user as this information could be exploited
 		}
-		
+
 		/** At this point we know the email matches a record in the DB.
 		 ** Now we just need to make sure the password is correct.
 		 ** If the password is correct we'll give session info
@@ -173,7 +180,7 @@ class DatabaseController{
 		$hash = $loginResult['password'];
 		if(!password_verify($password.PASSWORD_SALT,$hash)){
 			/** The password provided did not match the one in the database **/
-			
+
 			/** Increment the attempt_count for this user, and lock the account if necessary **/
 			return 0;
 		}
@@ -184,16 +191,16 @@ class DatabaseController{
 			}
 			return $uidValue;
 		}
-		
+
 		return 0; //This code should never be reached, but I like to be safe.
-	}	
-	
-	/* 
+	}
+
+	/*
 	 * Updates the database with a password hash of new complexity value.
 	 */
 	private function updatePasswordHash($uid, $unhashedPassword){
 		$hash = password_hash($password.PASSWORD_SALT, PASSWORD_BCRYPT, array("cost" => AUTH_HASH_COMPLEXITY));
-					
+
 		$hashUpdate = "UPDATE users SET password=:hash WHERE uid=:uid;";
 		try{
 			$hashUpdateStatement = $this->sqlCon()->prepare($hashUpdate);
@@ -203,17 +210,17 @@ class DatabaseController{
 			logError("Could not update a user's rehashed password! Code: {$e->getCode()}. UID: \"{$uid}\"",$e->getMessage());
 		}
 	}
-	
+
 	/*
 	 * Gets a user's UID from the user table corresponding to the given email address.
 	 * Returns an int representing the uid of the user, 0 if the there is no matching email, or false on error.
-	 */ 
+	 */
 	public function getUidFromEmail($email){
 		$userCheckQuery = "SELECT uid FROM users WHERE email=:email LIMIT 1;"; //Make sure this keeps LIMIT 1
 		try{
 			$statement = $this->sqlCon()->prepare($userCheckQuery);
 			$statement->execute(array(':email' => $email));
-			
+
 			//If the query returned rows, then someone IS registered using this email
 			if($statement->rowCount() > 0){
 				$match = $statement->fetch();
@@ -228,8 +235,8 @@ class DatabaseController{
 		}
 		return false;
 	}
-    
-    
+
+
     /*
      * Updates a specific user's oauth access token.
      * $uid: the user id of to whom the access token belongs
@@ -254,7 +261,7 @@ class DatabaseController{
         }
         return false;
     }
-    
+
     /*
      * Updates a user's oauth refresh token.
      * $uid: the user id of to whom the refresh token belongs
@@ -276,11 +283,11 @@ class DatabaseController{
         }
         return false;
     }
-	
+
 	/***********************************************************/
 	/* User information methods                                */
 	/***********************************************************/
-	
+
 	/*
 	 * Get information from the user table
 	 */
@@ -290,7 +297,7 @@ class DatabaseController{
 			$userStatement = $this->sqlCon()->prepare($userQuery);
 			$userStatement->bindParam(':uid',$uid,PDO::PARAM_INT);
 			$userStatement->execute();
-			
+
 			if(($userData = $userStatement->fetch(PDO::FETCH_ASSOC)) !== false){
 				return $userData;
 			}
@@ -300,26 +307,26 @@ class DatabaseController{
 		}
 		return false;
 	}
-    
+
     /*
      * Fetches the OAuth access token for the user specified by $uid.
      * returns a \pirrs\user\AccessToken object, or false on error.
      */
     public function getUserAccessToken($uid){
         try{
-            //Select 
+            //Select
             $tokenQuery = $this->sqlCon()->prepare('
-                SELECT 
+                SELECT
                     users.uid, users.access_token AS token,
                     users.access_expiration AS expiration,
                     users.access_updated AS updated
-                FROM users 
+                FROM users
                 WHERE users.uid=:uid
             ');
-            
+
             $tokenQuery->bindParam(':uid',$uid,PDO::PARAM_STR);
             $tokenQuery->execute();
-            
+
             $tokenQuery->setFetchMode(PDO::FETCH_CLASS,\pirrs\user\AccessToken::class);
             $token = $tokenQuery->fetch();
 
@@ -332,7 +339,7 @@ class DatabaseController{
         }
         return false;
     }
-    
+
     /*
      * Fetches the OAuth refresh token for the user specified by $uid
      * returns the a \pirrs\user\RefreshToken object if a refresh token exists
@@ -343,7 +350,7 @@ class DatabaseController{
             $tokenQuery = $this->sqlCon()->prepare('SELECT uid, refresh_token AS token FROM users WHERE uid=:uid');
             $tokenQuery->bindParam(':uid',$uid,PDO::PARAM_STR);
             $tokenQuery->execute();
-            
+
             $tokenQuery->setFetchMode(PDO::FETCH_CLASS,\pirrs\user\RefreshToken::class);
             $token = $tokenQuery->fetch();
             if($token !== false && $token->token != ''){
@@ -355,7 +362,7 @@ class DatabaseController{
         }
         return false;
     }
-	
+
 	/*
 	 * Returns the string of the full name of the user corresponding to the given uid.
 	 */
@@ -365,7 +372,7 @@ class DatabaseController{
 		}
 		return false;
 	}
-	
+
 	/***********************************************************/
 	/* Database Methods                                        */
 	/***********************************************************/
