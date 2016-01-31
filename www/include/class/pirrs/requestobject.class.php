@@ -27,6 +27,13 @@ class RequestObject{
 	public function executePut(){ $this->response->setStatusCode(405); }
 	public function executeDelete(){ $this->response->setStatusCode(405);}
 
+  /**
+	 * Overwrite this function in a page class to only allow the page to load if the viewer is logged in
+	 */
+	public function requireLoggedIn(){
+		return false;
+	}
+
     /*
      * Change the type of the response object for this request.
      * Creates a new response object of the class type that cooresponds
