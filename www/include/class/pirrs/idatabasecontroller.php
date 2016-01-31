@@ -1,5 +1,5 @@
 <?php
-namespace tyto;
+namespace pirrs;
 interface iDatabaseController{
   /**
    * Check if a given user ID, $uid, is valid
