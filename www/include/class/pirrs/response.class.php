@@ -70,8 +70,46 @@ class Response{
 		return $this->statusCodeMes;
 	}
 
-	public function setContent($content){
+	/**
+	 * Clears anything stored in $this->content and replaces it with $content.
+	 */
+	public function overwriteContent($content){
 		$this->content = $content;
+	}
+
+	/**
+	 * Append the given $content to the response's output content.
+	 * If $content is an array, array_merge is called to merge with current.
+	 * Otherwise, $content is appended to the end of $this->content.
+	 */
+	public function appendContent($content){
+		if($this->content == null){
+			$this->content = $content;
+			return;
+		}
+
+
+		if(is_array($content)){
+			if(is_array($this->content)){
+				$this->content = array_merge($this->content, $content);
+				return;
+			}
+			else{
+				$this->content = array_merge(array($this->content), $content);
+			}
+			//Do something else?
+		}
+
+		//fall through to appending. handle other cases above
+		$this->content .= $content;
+	}
+
+	/**
+	 * Alias of $this->overwriteContent();
+	 * @see overwriteContent()
+	 */
+	public function setContent($content){
+		$this->overwriteContent($content);
 	}
 
 	public function getContent(){
