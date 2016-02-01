@@ -296,7 +296,8 @@ class Request{
 		$missing = array();
 		$isset = true;
 		foreach($toTest as $testArg){
-			$isset = $isset && ($isPresent = isset($this->req[$testArg]) && !is_array($this->req[$testArg]));
+			$isPresent = isset($this->req[$testArg]) && !is_array($this->req[$testArg]);
+			$isset = $isset && $isPresent;
 			if(!$isPresent){
 				$missing[] = $testArg; //Append $testArg to the list of missing arguments
 			}
@@ -317,7 +318,8 @@ class Request{
 		$missing = array();
 		$isset = true;
 		foreach($toTest as $testArg){
-			$isset = $isset & ($isPresent = isset($this->req[$testArg]) && is_array($this->req[$testArg]));
+			$isPresent = isset($this->req[$testArg]) && is_array($this->req[$testArg]);
+			$isset = $isset && $isPresent;
 			if(!$isPresent){
 				$missing[] = $testArg; //Append $testArg to the list of missing arguments
 			}
