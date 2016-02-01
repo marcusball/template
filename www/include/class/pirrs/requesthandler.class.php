@@ -97,7 +97,7 @@ class RequestHandler{
 					//Okay, time to display a page
 					//pageFunctionObject will be of type PageObject
 					$this->pageFunctionObject = new $requestClass(); //Instantiate our page handling object
-					$this->pageFunctionObject->request->setArgs($request->args);
+					$this->pageFunctionObject->request = $request;
 
 					if(call_user_func(array($this->pageFunctionObject,REQUEST_FUNC_REQUIRE_LOGGED_IN)) === true && !$this->user->isLoggedIn()){ //If the user must be logged in to view this page, and the user is not logged in
 						return DefaultResponses::Unauthorized(); //not authorized
@@ -140,7 +140,7 @@ class RequestHandler{
 				//respond to an API request
 				//pageFunctionObject will be of type APIObject
 				$this->pageFunctionObject = new $requestClass(); //Instantiate our page handling object
-				$this->pageFunctionObject->request->setArgs($request->args);
+				$this->pageFunctionObject->request = $request;
 
 				$this->interalPreExecute(); //Call the global RequestHandler pre-execution function. Take care of anything that should happen before the page begins loading.
 				$preexResult = call_user_func(array($this->pageFunctionObject,REQUEST_FUNC_PRE_EXECUTE)); //Call the page specific pre-execution function.
