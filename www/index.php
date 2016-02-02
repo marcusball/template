@@ -32,7 +32,7 @@ try{
 catch(\Exception $e){ //We fucked up.
 	Log::error('An otherwise unhandled exception has occurred.',$e->__toString());
 
-	OutputHandler::handleAPIOutput(DefaultAPIResponses::ServerError());
+	OutputHandler::sendResponse(DefaultAPIResponses::ServerError());
 }
 
 /*$endTime = microtime(true);
