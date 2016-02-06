@@ -82,6 +82,23 @@ function typeIs($object, $type){
 	return ($type === $objectClass);
 }
 
+/**
+ * Include a file from the /page-include/ directory.
+ * @param $file the name of a file, or path to a file relative to the /page-include/ directory.
+ * @return TRUE if file is included successfully, FALSE otherwise.
+ */
+function includeFile($file){
+	$path = realpath(INCLUDE_PATH_PAGE_INCLUDE . $file);
+	if($path !== false && file_exists($path)){
+		//Make sure $path is a path INSIDE OF the include directory
+		if(stripos($path, INCLUDE_PATH_PAGE_INCLUDE) === 0){
+			RequestHandler::includePageFile($path,new NoPage());
+			return true;
+		}
+	}
+	return false;
+}
+
 /** Imports and includes **/
 init(); //Import stuff
 

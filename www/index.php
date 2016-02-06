@@ -14,8 +14,7 @@ function runPageLogicProcedure(){
 	//Just remember that, internally "bla.com/" will still be considered "bla.com/index.php" when checking the rewrite condition.
 	$request = Request::createRequest($_SERVER['REQUEST_URI'], dirname($_SERVER['SCRIPT_NAME']), REWRITE_ENABLE, REWRITE_ONLY);
 	if($request !== false){
-			$Handler = new RequestHandler();
-			$response = $Handler->execute($request);
+			$response = RequestHandler::execute($request);
 			OutputHandler::sendResponse($response);
 		}
 		else{

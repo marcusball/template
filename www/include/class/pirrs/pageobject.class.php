@@ -31,19 +31,6 @@ class PageObject extends RequestObject{
 	}
 
 	/*
-	 * This is where template files get included an executed. By placing them in the PageObject class,
-	 * the templates are isolated to the handling object, so calls to $this, should refer to the handling PageObject.
-	 * $file is the path to the file to include
-	 * $global should be a $this reference to the RequestHandler class that calls this function.
-	 */
-	public function executeTemplate($file,$global){
-		${TEMPLATE_REFERENCE_VARIABLE} = $this;
-		${GLOBAL_REFERENCE_VARIABLE} = $global; //This will give the page a reference to this RequestHandler to access public methods
-		${USER_REFERENCE_VARIABLE} = $this->request->user;
-		include $file; //Execution of the template begins.
-	}
-
-	/*
 	 * This function will be called by most template pages
 	 * Overwrite it to set a new title for each page.
 	 */

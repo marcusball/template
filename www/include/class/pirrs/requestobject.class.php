@@ -66,5 +66,15 @@ class RequestObject{
             $this->response->apply($temp);
         }
     }
+
+
+    /*
+  	 * This is where template files get included an executed. By placing them in the PageObject class,
+  	 * the templates are isolated to the handling object, so calls to $this, should refer to the handling PageObject.
+  	 * $file is the path to the file to include
+  	 */
+  	public function executeTemplate($file){
+  		include $file; //Execution of the template begins.
+  	}
 }
 ?>

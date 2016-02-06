@@ -15,7 +15,7 @@ $REWRITE_RULES = array(
 //Whether or not rewriting should be attempted at all.
 define('REWRITE_ENABLE',true);
 //ONLY allow pages to be accessed if they're in the rewrite rules.
-//  will be ignored if REWRITE_ENABLE is FALSE. 
+//  will be ignored if REWRITE_ENABLE is FALSE.
 define('REWRITE_ONLY',false);
 
 /****************************************************************/
@@ -102,9 +102,9 @@ define('REQUEST_FUNC_RET_DATA','getData');
 define('REQUEST_FUNC_RET_STATUS','getStatus');
 
 //Define the name of the variable that will be used to reference the template's page object.
-define('TEMPLATE_REFERENCE_VARIABLE','Page'); //Ex: if this is 'Page', then inside the template, all functions calls will be made by calling $Page ($Page->doSomething()).
-define('GLOBAL_REFERENCE_VARIABLE','GlobalPage'); //Same as the above, except this will reference global functions provided by the RequestHandler.
-define('USER_REFERENCE_VARIABLE','User'); //The name of the variable that will contain information about the current user
+//define('TEMPLATE_REFERENCE_VARIABLE','Page'); //Ex: if this is 'Page', then inside the template, all functions calls will be made by calling $Page ($Page->doSomething()).
+//define('GLOBAL_REFERENCE_VARIABLE','GlobalPage'); //Same as the above, except this will reference global functions provided by the RequestHandler.
+//define('USER_REFERENCE_VARIABLE','User'); //The name of the variable that will contain information about the current user
 
 define('STATUS_OKAY',200);
 define('STATUS_NOT_FOUND',404);
