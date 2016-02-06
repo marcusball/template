@@ -4,7 +4,7 @@
 		<title>Yeah, a sweet test page</title>
 	</head>
 	<body>
-		<h1><?php $Page->printTitle(); ?></h1>
-		<p><?php $Page->someOtherPrint(); ?></p>
+		<h1><?php $this->printTitle(); ?></h1>
+		<p><?php $this->someOtherPrint(); ?></p>
 	</body>
 </html>

@@ -1,10 +1,10 @@
-<?php 
+<?php
+namespace pirrs;
 /*
- * The GlobalPage variable is available to any template file. It references the RequestHandler object in index.php.
- * You can use includeFile($filename), to include files from the /page-include/ folder. 
- * This is useful for including things like headers and footers. 
+ * You can use includeFile($filename), to include files from the /page-include/ folder.
+ * This is useful for including things like headers and footers.
  */
-$GlobalPage->includeFile('header.php'); ?>
+includeFile('header.php'); ?>
 		<div id="container">
 			<header>
 				<div id="logo">
@@ -18,7 +18,7 @@ $GlobalPage->includeFile('header.php'); ?>
 				</nav>
 			</header>
 			<div id="body">
-				<?php $Page->createBody(); ?>
+				<?php $this->createBody(); ?>
 			</div>
 		</div>
-<?php $GlobalPage->includeFile('footer.php'); ?> 
+<?php includeFile('footer.php'); ?>
