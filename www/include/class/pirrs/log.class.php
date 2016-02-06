@@ -53,7 +53,7 @@ class Log{
 		$data = sprintf("[%s][%s][%s] (%s): %s %s\n",
 			'error',
 			date('D, j M Y, \a\t g:i:s A'),
-			$_SERVER['REMOTE_ADDR'],
+			self::getRemoteAddress(),
 			$callLocation,
 			$description,
 			$error
@@ -89,7 +89,7 @@ class Log{
 		$data = sprintf("[%s][%s][%s] (%s): %s\n",
 			'warning',
 			date('D, j M Y, \a\t g:i:s A'),
-			isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : "UNKNOWN ADDR",
+			self::getRemoteAddress(),
 			$callLocation,
 			$description
 		);
@@ -124,7 +124,7 @@ class Log{
 		$data = sprintf("[%s][%s][%s] (%s): %s\n",
 			'debug',
 			date('D, j M Y, \a\t g:i:s A'),
-			$_SERVER['REMOTE_ADDR'],
+			self::getRemoteAddress(),
 			$callLocation,
 			$description
 		);
@@ -152,7 +152,7 @@ class Log{
 		$data = sprintf("[%s][%s][%s] (%s): %s\n",
 			'dump',
 			date('D, j M Y, \a\t g:i:s A'),
-			$_SERVER['REMOTE_ADDR'],
+			self::getRemoteAddress(),
 			$callLocation,
 			var_export($variable, true)
 		);
@@ -169,7 +169,7 @@ class Log{
 		$data = sprintf("[%s][%s][%s] (%s): %s\n%s\n",
 			'trace',
 			date('D, j M Y, \a\t g:i:s A'),
-			$_SERVER['REMOTE_ADDR'],
+			self::getRemoteAddress(),
             $callLocation,
 			$note,
 			self::getPrintableDebugTrace()
@@ -212,7 +212,6 @@ class Log{
         $indexShift = 2; //omit this many levels from the bottom of the trace (ignore this function).
         foreach($debug as $index=>$tracePoint){
             if($index >= $indexShift){
-                //    #0 D:\Users\Marcus\Websites\pirrs\api\include\class\pirrs\databasecontroller.class.php(1791): PDOStatement->execute()\
                 $path = self::cleanCallingFilePath($tracePoint['file']);
                 $line = sprintf('    #%d %s(%d): %s()',
                     $index - $indexShift,
@@ -224,4 +223,14 @@ class Log{
         }
         return $printable;
     }
+
+		/**
+		 * Attempts to get the remote address of the client.
+		 * Calls $_SERVER['REMOTE_ADDR'].
+		 * @return The remote address of the client, or a
+		 *   static string if remote address can't be found.
+		 */
+		private static function getRemoteAddress(){
+			return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'UNKNOWN ADDR';
+		}
 } Log::construct(); //Call to initialize defaults. This must be here.
