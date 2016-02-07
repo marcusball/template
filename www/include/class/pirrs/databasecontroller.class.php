@@ -155,7 +155,7 @@ class DatabaseController implements iDatabaseController{
 		/** BEGIN: Query database for login authentication **/
 		$loginQuery = 'SELECT uid, email, password FROM users WHERE uid=:uid LIMIT 1;';
 		try{
-			$loginStatement = $this->sqlCon->prepare($loginQuery);
+			$loginStatement = $this->sqlCon()->prepare($loginQuery);
 			$loginStatement->bindParam(':uid',$uid,PDO::PARAM_STR);
 			$loginStatement->execute();
 			$loginResult = $loginStatement->fetch();
