@@ -32,7 +32,6 @@ class RequestHandler{
 		Response::preExecute();
 		$response = self::executePrivate($request);
 		Response::postExecute($response);
-		Log::dump($response);
 		return $response;
 	}
 
@@ -176,6 +175,8 @@ class RequestHandler{
 			//logWarning("No class was found that is a subclass of {$parentClass}!",'index.php',__LINE__);
 			return false;
 		}
+
+		//Get the last child, assuming that's the most recently included class
 		return $children[count($children) - 1]->name;
 	}
 
