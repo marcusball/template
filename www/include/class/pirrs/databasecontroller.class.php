@@ -61,7 +61,7 @@ class DatabaseController implements iDatabaseController{
 			}
 		}
 		catch(PDOException $e){
-			logError('Error while checking if Uid is valid',$e->getMessage());
+			Log::error('Error while checking if Uid is valid',$e->getMessage());
 		}
 		return false;
 	}
@@ -99,7 +99,7 @@ class DatabaseController implements iDatabaseController{
 		}
 		catch(PDOException $e){
 			$this->sqlCon()->rollBack();
-			logError("An error occurred while registering a new user! Code: {$e->getCode()}.",$e->getMessage());
+			Log::error("An error occurred while registering a new user! Code: {$e->getCode()}.",$e->getMessage());
 			return false;
 		}
 
@@ -124,7 +124,7 @@ class DatabaseController implements iDatabaseController{
 			}
 		}
 		catch(PDOException $e){
-			logError('databasecontroller.php',__LINE__,'Error while trying to update user\'s password!',$e->getMessage,time(),false);
+			Log::error('databasecontroller.php',__LINE__,'Error while trying to update user\'s password!',$e->getMessage,time(),false);
 
 		}
 		return false;
@@ -161,7 +161,7 @@ class DatabaseController implements iDatabaseController{
 			$loginResult = $loginStatement->fetch();
 		}
 		catch(PDOException $e){
-			logError("Could not check user's login credentials. Code: {$e->getCode()}. UID: \"{$uid}\"");
+			Log::error("Could not check user's login credentials. Code: {$e->getCode()}. UID: \"{$uid}\"");
 			return false;
 		}
 
@@ -207,7 +207,7 @@ class DatabaseController implements iDatabaseController{
 			$hashUpdateStatement->execute(array(':hash'=>$hash,':uid'=>$uid));
 		}
 		catch(PDOException $e){
-			logError("Could not update a user's rehashed password! Code: {$e->getCode()}. UID: \"{$uid}\"",$e->getMessage());
+			Log::error("Could not update a user's rehashed password! Code: {$e->getCode()}. UID: \"{$uid}\"",$e->getMessage());
 		}
 	}
 
@@ -231,7 +231,7 @@ class DatabaseController implements iDatabaseController{
 			}
 		}
 		catch(PDOException $e){
-			logError("Error executing getting user from email! Query: \"$userCheckQuery\", Email: \"$email\".",$e->getMessage());
+			Log::error("Error executing getting user from email! Query: \"$userCheckQuery\", Email: \"$email\".",$e->getMessage());
 		}
 		return false;
 	}
@@ -303,7 +303,7 @@ class DatabaseController implements iDatabaseController{
 			}
 		}
 		catch(PDOException $e){
-			logError("Error executing getting user information! Uid = {$uid}.",$e->getMessage());
+			Log::error("Error executing getting user information! Uid = {$uid}.",$e->getMessage());
 		}
 		return false;
 	}
