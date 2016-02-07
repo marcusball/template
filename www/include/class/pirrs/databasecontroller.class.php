@@ -199,7 +199,7 @@ class DatabaseController implements iDatabaseController{
 	 * Updates the database with a password hash of new complexity value.
 	 */
 	private function updatePasswordHash($uid, $unhashedPassword){
-		$hash = password_hash($password.PASSWORD_SALT, PASSWORD_BCRYPT, array("cost" => AUTH_HASH_COMPLEXITY));
+		$hash = password_hash($unhashedPassword.PASSWORD_SALT, PASSWORD_BCRYPT, array("cost" => AUTH_HASH_COMPLEXITY));
 
 		$hashUpdate = "UPDATE users SET password=:hash WHERE uid=:uid;";
 		try{
