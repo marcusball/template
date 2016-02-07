@@ -176,7 +176,7 @@ class RequestHandler{
 			//logWarning("No class was found that is a subclass of {$parentClass}!",'index.php',__LINE__);
 			return false;
 		}
-		return $children[0]->name;
+		return $children[count($children) - 1]->name;
 	}
 
 	/*
