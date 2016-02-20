@@ -290,15 +290,33 @@ class DatabaseController implements iDatabaseController{
 
 	/*
 	 * Get information from the user table
+	 * @param $uid The uid of the user to update.
+	 * @param $userObject A *reference* to a \tyto\User object. Data will be
+	 *   fetched into this object if provided.
+	 * @return a User object containing information. If $userObject is null,
+	 *   a new User object will be created, otherwise, return will be
+	 *   the updated $userObject.
+	 * @note If $userObject is not null, all information will be overwritten,
+	 *   regardless of whether $userObject->uid == $uid.
 	 */
-	public function getUserInformation($uid){
-		$userQuery = 'SELECT uid, email, full_name FROM users WHERE uid=:uid LIMIT 1;';
+	public function getUserInformation($uid, User &$userObject = null){
+		$userQuery = 'SELECT id, email FROM users WHERE id=:uid LIMIT 1;';
 		try{
 			$userStatement = $this->sqlCon()->prepare($userQuery);
 			$userStatement->bindParam(':uid',$uid,PDO::PARAM_INT);
 			$userStatement->execute();
 
-			if(($userData = $userStatement->fetch(PDO::FETCH_ASSOC)) !== false){
+			//If no $userObject is provided, we'll fetch into a new object
+			if($userObject === null){
+				$userStatement->setFetchMode(PDO::FETCH_CLASS, User::class);
+			}
+			//Otherwsie, fetch into the existing object
+			else{
+				$userStatement->setFetchMode(PDO::FETCH_INTO, $userObject);
+			}
+
+			//Fetch and return the user object
+			if(($userData = $userStatement->fetch()) !== false){
 				return $userData;
 			}
 		}

@@ -50,9 +50,17 @@ interface iDatabaseController{
  	  */
    public function getUidFromEmail($email);
 
-   /**
+   /*
  	  * Get information from the user table
+ 	  * @param $uid The uid of the user to update.
+ 	  * @param $userObject A *reference* to a \tyto\User object. Data will be
+ 	  *   fetched into this object if provided.
+ 	  * @return a User object containing information. If $userObject is null,
+ 	  *   a new User object will be created, otherwise, return will be
+ 	  *   the updated $userObject.
+ 	  * @note If $userObject is not null, all information will be overwritten,
+ 	  *   regardless of whether $userObject->uid == $uid.
  	  */
-   public function getUserInformation($uid);
+   public function getUserInformation($uid, User &$userObject = null);
 }
 ?>
