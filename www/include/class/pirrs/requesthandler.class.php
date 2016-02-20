@@ -110,7 +110,7 @@ class RequestHandler{
 				$preexResult = call_user_func(array($pageFunctionObject,REQUEST_FUNC_PRE_EXECUTE)); //Call the page specific pre-execution function.
 
         if(call_user_func(array($pageFunctionObject,REQUEST_FUNC_REQUIRE_LOGGED_IN)) === true && !$pageFunctionObject->request->user->isLoggedIn()){ //If the user must be logged in to view this page, and the user is not logged in
-            return DefaultResponses::Login(); //not authorized
+            return DefaultResponses::Unauthorized(); //not authorized
         }
         else{
             if($preexResult !== false){ //If preExecute() returns false, cancel loading of template
