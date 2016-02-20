@@ -381,16 +381,6 @@ class DatabaseController implements iDatabaseController{
         return false;
     }
 
-	/*
-	 * Returns the string of the full name of the user corresponding to the given uid.
-	 */
-	public function getUserFullName($uid){
-		if(($info = $this->getUserInformation($uid)) !== false){
-			return $info['full_name'];
-		}
-		return false;
-	}
-
 	/***********************************************************/
 	/* Database Methods                                        */
 	/***********************************************************/
