@@ -91,7 +91,7 @@ class CurrentUser extends User{
      * Check if the $uid stored in a user's session is valid.
      */
 	private function isValidUser($uid){
-		if(DB_ENABLE){
+		if(Config::database('enable')){
 			$dbCon = ResourceManager::getDatabaseController();
 			return $dbCon->isValidUid($uid);
 		}

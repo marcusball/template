@@ -6,15 +6,6 @@ define('SITE_NAME','Template');
 define('SITE_DOMAIN_TOP','template.local'); //The highest level of the domain of this site. (No subdomains).
 define('SITE_DOMAIN','www.'.SITE_DOMAIN_TOP); //Primary (sub)domain of this website (www.example.com / example.com).
 
-define('DB_ENABLE',false); //Set to false to disable database connection
-define('DB_PDO_NAME','pgsql'); // The PDO name for your database server
-define('DB_NAME', 'my_database');
-define('DB_USER', 'user');
-define('DB_PASSWORD', 'password');
-define('DB_HOST', 'localhost');
-define('DB_CHARSET', 'utf8');
-define('DB_COLLATE', '');
-
 //Set to true to enable basic OAuth2 client functionality
 define('OAUTH_CLIENT_ENABLE',false);
 //The API ID used to authenticate against a remote OAuth server
@@ -33,9 +24,9 @@ define('OAUTH_SERVER_ACCESS_URL','http://example.com/oauth/token');
 //The base url of the remote API at which all API requests will be made.
 //For example, if all API requests to example.com follow the pattern:
 //  http://example.com/api/somedata, then, for this value
-//  use 'http://example.com/api/', and subsequent API calls in 
+//  use 'http://example.com/api/', and subsequent API calls in
 //  OAuthManager may be used by using OAuthManager->generateUrl($url)
-//  with the value of $url being 'somedata'. 
+//  with the value of $url being 'somedata'.
 define('OAUTH_API_BASE','http://api.example.com/');
 
 

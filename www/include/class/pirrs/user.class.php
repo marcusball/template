@@ -26,7 +26,7 @@ class User extends UserRow{
 	}
 
 	public function getUserInformation(){
-		if(DB_ENABLE){
+		if(Config::database('enable')){
 			$dbCon = ResourceManager::getDatabaseController();
 			$dbCon->getUserInformation($this->uid, $this);
 		}
