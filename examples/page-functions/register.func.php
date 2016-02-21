@@ -31,13 +31,13 @@ class RegistrationPage extends PageObject{
 
 		list($fullName, $addressingName, $emailAddress, $password, $passwordConf) = $this->request->getReqList('full_name','addressing_name','email','password','password_conf');
 		/* Perform some validation on the different inputs */
-		if(($fullName = \tyto\Utilities\Validation::isValidName($fullName,Config::input('full_name_max_length'),Config::input('name_min_length'))) === false){
+		if(($fullName = \pirrs\Utilities\Validation::isValidName($fullName,Config::input('full_name_max_length'),Config::input('name_min_length'))) === false){
 			$this->response->addError('There is a problem with your full name! Maybe it contains some invalid characters?');
 		}
-		if(($addressingName = \tyto\Utilities\Validation::isValidName($addressingName,Config::input('addressing_name_max_length'),Config::input('name_min_length'))) === false){
+		if(($addressingName = \pirrs\Utilities\Validation::isValidName($addressingName,Config::input('addressing_name_max_length'),Config::input('name_min_length'))) === false){
 			$this->response->addError('There is a problem with the name you said we should address you with! Maybe it contains some invalid characters?');
 		}
-		if(!\tyto\Utilities\Validation::isValidEmail($emailAddress,Config::input('email_max_length'),Config::input('email_min_length'))){
+		if(!\pirrs\Utilities\Validation::isValidEmail($emailAddress,Config::input('email_max_length'),Config::input('email_min_length'))){
 			$this->response->addError('Your email address does not appear to be valid!');
 		}
 		if(($emailCheck = $this->dbCon->checkIfEmailExists($emailAddress)) !== 0){
@@ -48,7 +48,7 @@ class RegistrationPage extends PageObject{
 				$this->response->addError('Something has gone wrong! Please try to register again.');
 			}
 		}
-		if(!\tyto\Utilities\Validation::isValidLength($password,Config::input('password_max_length'),Config::input('password_min_length'))){
+		if(!\pirrs\Utilities\Validation::isValidLength($password,Config::input('password_max_length'),Config::input('password_min_length'))){
 			$this->response->addError('Your password is either too short or too long. Make sure it is at least ' . Config::input('password_min_length') . ' characters long, maximum length ' . Config::input('password_max_length') . ' characters.');
 		}
 		if($password !== $passwordConf){

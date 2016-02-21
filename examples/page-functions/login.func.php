@@ -37,7 +37,7 @@ class LoginPage extends PageObject{
 		list($emailAddress, $password) = $this->request->getReqList('email','password');
 		/* Perform some validation on the different inputs */
 
-		if(!\tyto\utilities\Validation::isValidEmail($emailAddress,Config::input('email_max_length'),Config::input('email_min_length'))){
+		if(!\pirrs\utilities\Validation::isValidEmail($emailAddress,Config::input('email_max_length'),Config::input('email_min_length'))){
 			$this->addError('Your email address does not appear to be valid!');
 		}
 		if(($emailCheck = $this->dbCon->checkIfEmailExists($emailAddress)) !== 1){

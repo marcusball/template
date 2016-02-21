@@ -40,7 +40,7 @@ class AuthorizePage extends PageObject{
                     Log::error('Received unexpected data from OAuth server!',json_encode($authData));
                 }
 
-                $accessToken = new \tyto\user\AccessToken();
+                $accessToken = new \pirrs\user\AccessToken();
                 //uid is unknown
                 $accessToken->token = $authData->access_token;
                 $accessToken->expiration = $authData->expires_in;
