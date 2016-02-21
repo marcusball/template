@@ -65,13 +65,14 @@ class RequestHandler{
 				$pageFunctionObject = new $requestClass(); //Instantiate our page handling object
 				$pageFunctionObject->request = $request;
 
-				if(call_user_func(array($pageFunctionObject,REQUEST_FUNC_REQUIRE_LOGGED_IN)) === true && !$pageFunctionObject->request->user->isLoggedIn()){ //If the user must be logged in to view this page, and the user is not logged in
-					return DefaultResponses::Unauthorized(); //not authorized
-				}
-				else{
-					$preexResult = call_user_func(array($pageFunctionObject,REQUEST_FUNC_PRE_EXECUTE)); //Call the page specific pre-execution function.
-					if($preexResult !== false){ //If preExecute() returns false, cancel loading of template\
-
+				$preexResult = call_user_func(array($pageFunctionObject,REQUEST_FUNC_PRE_EXECUTE)); //Call the page specific pre-execution function.
+				//If preExecute() returns false, cancel loading of template\
+				if($preexResult !== false){
+					//If the user must be logged in to view this page, and the user is not logged in
+					if(call_user_func(array($pageFunctionObject,REQUEST_FUNC_REQUIRE_LOGGED_IN)) === true && !$pageFunctionObject->request->user->isLoggedIn()){
+						return DefaultResponses::Unauthorized(); //not authorized
+					}
+					else{
             //Before we execute the template, we'll call the function cooresponding to the request method
             switch($pageFunctionObject->request->getMethod()){
                 default:
@@ -109,29 +110,29 @@ class RequestHandler{
 				self::interalPreExecute(); //Call the global RequestHandler pre-execution function. Take care of anything that should happen before the page begins loading.
 				$preexResult = call_user_func(array($pageFunctionObject,REQUEST_FUNC_PRE_EXECUTE)); //Call the page specific pre-execution function.
 
-        if(call_user_func(array($pageFunctionObject,REQUEST_FUNC_REQUIRE_LOGGED_IN)) === true && !$pageFunctionObject->request->user->isLoggedIn()){ //If the user must be logged in to view this page, and the user is not logged in
-            return DefaultResponses::Unauthorized(); //not authorized
-        }
-        else{
-            if($preexResult !== false){ //If preExecute() returns false, cancel loading of template
-                switch($pageFunctionObject->request->getMethod()){
-                    default:
-                    case(RequestMethod::GET):
-                        call_user_func(array($pageFunctionObject,'executeGet'));
-                        break;
-                    case RequestMethod::POST:
-                        call_user_func(array($pageFunctionObject,'executePost'));
-                        break;
-                    case RequestMethod::PUT:
-                        call_user_func(array($pageFunctionObject,'executePut'));
-                        break;
-                    case RequestMethod::DELETE:
-                        call_user_func(array($pageFunctionObject,'executeDelete'));
-                        break;
-                }
-            }
-            call_user_func(array($pageFunctionObject,REQUEST_FUNC_POST_EXECUTE)); //Page specific post-execution function.
-        }
+				if($preexResult !== false){ //If preExecute() returns false, cancel loading of template
+					if(call_user_func(array($pageFunctionObject,REQUEST_FUNC_REQUIRE_LOGGED_IN)) === true && !$pageFunctionObject->request->user->isLoggedIn()){ //If the user must be logged in to view this page, and the user is not logged in
+						return DefaultAPIResponses::Unauthorized(); //not authorized
+					}
+					else{
+						switch($pageFunctionObject->request->getMethod()){
+							default:
+							case(RequestMethod::GET):
+								call_user_func(array($pageFunctionObject,'executeGet'));
+								break;
+							case RequestMethod::POST:
+								call_user_func(array($pageFunctionObject,'executePost'));
+								break;
+							case RequestMethod::PUT:
+								call_user_func(array($pageFunctionObject,'executePut'));
+								break;
+							case RequestMethod::DELETE:
+								call_user_func(array($pageFunctionObject,'executeDelete'));
+								break;
+						}
+						call_user_func(array($pageFunctionObject,REQUEST_FUNC_POST_EXECUTE)); //Page specific post-execution function.
+					}
+				}
 			}
 			self::internalPostExecute($pageFunctionObject->response); //Call the global RequestHandler postExecute function. Perform any tasks we want to always occur after processing, but before sending output.
 			return $pageFunctionObject->response;
