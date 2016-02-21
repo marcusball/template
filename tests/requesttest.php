@@ -61,19 +61,19 @@ public function testParsePathRootWithParams(){
       $this->assertEquals(Request::cleanPath(''), 'index');
       $this->assertEquals(Request::cleanPath('/'), 'index');
 
-      $this->assertEquals(Request::cleanPath('/index.php'), 'index'); //Needs to be here in case REQUEST_PHP_EXTENSION is != '.php'
+      $this->assertEquals(Request::cleanPath('/index.php'), 'index'); //Needs to be here in case Config::core('request_php_extension') is != '.php'
 
-      $this->assertEquals(Request::cleanPath('/index'.REQUEST_PHP_EXTENSION), 'index');
+      $this->assertEquals(Request::cleanPath('/index'.Config::core('request_php_extension')), 'index');
 
-      $this->assertEquals(Request::cleanPath('/index'.REQUEST_PHP_EXTENSION.'?test=true&false'), 'index');
+      $this->assertEquals(Request::cleanPath('/index'.Config::core('request_php_extension').'?test=true&false'), 'index');
     }
 
     public function testDirectory(){
       $this->assertEquals(Request::cleanPath('/subdirectory/'),'subdirectory/index');
 
-      $this->assertEquals(Request::cleanPath('/subdirectory/index'.REQUEST_PHP_EXTENSION),'subdirectory/index');
+      $this->assertEquals(Request::cleanPath('/subdirectory/index'.Config::core('request_php_extension')),'subdirectory/index');
 
-      $this->assertEquals(Request::cleanPath('/subdirectory/test'.REQUEST_PHP_EXTENSION),'subdirectory/test');
+      $this->assertEquals(Request::cleanPath('/subdirectory/test'.Config::core('request_php_extension')),'subdirectory/test');
 
       $this->assertEquals(Request::cleanPath('/subdirectory/nested/'),'subdirectory/nested/index');
     }

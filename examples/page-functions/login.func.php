@@ -6,7 +6,7 @@ class LoginPage extends PageObject{
 	public function pageTitle(){
 		echo "Log in";
 	}
-	
+
 	public function preExecute(){
 		if($this->request->user->isLoggedIn()){
 			$this->response->forwardTo('/');
@@ -14,30 +14,30 @@ class LoginPage extends PageObject{
 		}
 		if($this->request->issetReq('email','password')){
 			$this->loginSuccessful = $this->doLogin();
-            
+
             if($this->request->issetReq('destination')){
                 $dest = $this->request->getReq('destination');
-                
+
                 $this->response->forwardTo('//' . SITE_DOMAIN . $dest);
             }
 		}
 	}
-	
+
 	public function loginSuccessful(){
 		return $this->loginSuccessful;
 	}
-	
+
 	public function doLogin(){
 		$isset = $this->request->issetReqList('email','password');
 		if($isset !== true){
 			$this->addError('Request is missing the following ' . ((count($isset)==1)?'field':'fields') . ': ' . implode(', ',$isset));
 			return false;
 		}
-		
+
 		list($emailAddress, $password) = $this->request->getReqList('email','password');
 		/* Perform some validation on the different inputs */
 
-		if(!\pirrs\utilities\Validation::isValidEmail($emailAddress,INPUT_EMAIL_MAX_LENGTH,INPUT_EMAIL_MIN_LENGTH)){
+		if(!\tyto\utilities\Validation::isValidEmail($emailAddress,Config::input('email_max_length'),Config::input('email_min_length'))){
 			$this->addError('Your email address does not appear to be valid!');
 		}
 		if(($emailCheck = $this->dbCon->checkIfEmailExists($emailAddress)) !== 1){
@@ -48,18 +48,18 @@ class LoginPage extends PageObject{
 				$this->addError('Something has gone wrong! Please try to register again.');
 			}
 		}
-		
+
 		if($this->response->hasErrors()){
 			return false;
 		}
-		
+
 		$loginReturn = $this->dbCon->isValidLogin($emailAddress,$password);
 		if($loginReturn !== false && $loginReturn > 0){ //Successful
 			$userid = $loginReturn; //isValidLogin returns the UID value of the user on success
 			//debug("Welcome, user {$userid}!");
-			
+
 			$this->request->user->giveCredentials($userid);
-			
+
 			return true;
 		}
 		else{

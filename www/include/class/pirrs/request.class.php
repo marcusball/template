@@ -71,7 +71,7 @@ class Request{
 	}
 
 	/**
-	 * Take a given @path and strip REQUEST_PHP_EXTENSION, preceding slash,
+	 * Take a given @path and strip Config::core('request_php_extension'), preceding slash,
 	 *   and anything other than path to file.
 	 * @example "/path/to/file.php?example=true" => "path/to/file"
 	 * @param $path The path to clean
@@ -82,7 +82,7 @@ class Request{
 		if($path !== '/' && $path != ''){
 
 			//Convert the extension into something regex-safe (Escape the periods).
-		  $phpExtRegex = str_replace('.','\.',REQUEST_PHP_EXTENSION); //Convert something like '.php' to '\.php'
+		  $phpExtRegex = str_replace('.','\.',Config::core('request_php_extension')); //Convert something like '.php' to '\.php'
 
 			//Try to match against /some/path/to/file.php?querystuff=whatever,
 		    //  with the desired match results containing the named group "path"
@@ -110,7 +110,7 @@ class Request{
 			//Otherwise the path is "/?ffffff".
 			if(isset($matches['path'])){
 				$foundPath = $matches['path'];
-				//If '.php' is still present, then REQUEST_PHP_EXTENSION is probably != '.php'
+				//If '.php' is still present, then Config::core('request_php_extension') is probably != '.php'
 				//  however, index.php still needs to be handled correctly for rewrites,
 				//  If this condition is false (that is, if the path == 'index.php'),
 				//  then we will fall through to return the default 'index' value.
@@ -131,18 +131,26 @@ class Request{
 	}
 
 	public static function getRewritePath($path){
-		global $REWRITE_RULES; //get rewrite rules from config.php
-		foreach($REWRITE_RULES as $file=>$rule){
-			if($file != null && $rule != null){ //If there is a full rewrite rule; "file.php" => "/some/rewrite/rule"
-				$match = preg_match('#'.$rule.'#i',$path,$matches);
-				if($match !== 0 && $match !== false){
-					return array($file,$matches);
-				}
+		$REWRITE_RULES = Config::rewriterules(); //get rewrite rules from config.php
+
+		foreach($REWRITE_RULES as $file=>$rules){
+			//For simplicity, if $rules is not an array, we're going to make it into one
+			if(!is_array($rules)){
+				$rules = array($rules);
 			}
-			else{ //Otherwise
-				if($rule === null){ //in the case of: "file.php" => null
-					if($path == $file || $path == '/'.$file || ($path === '/' && $file === 'index.php')){ //if path == "file.php" OR path == "/file.php" OR (path == / and file is "index.php")
-						return array($file,array());
+
+			foreach($rules as $rule){
+				if($file != null && $rule != null){ //If there is a full rewrite rule; "file.php" => "/some/rewrite/rule"
+					$match = preg_match('#'.$rule.'#i',$path,$matches);
+					if($match !== 0 && $match !== false){
+						return array($file,$matches);
+					}
+				}
+				else{ //Otherwise
+					if($rule === null){ //in the case of: "file.php" => null
+						if($path == $file || $path == '/'.$file || ($path === '/' && $file === 'index.php')){ //if path == "file.php" OR path == "/file.php" OR (path == / and file is "index.php")
+							return array($file,array());
+						}
 					}
 				}
 			}
@@ -230,6 +238,13 @@ class Request{
 	}
 	public function isPost(){
 		return $this->getMethod() == RequestMethod::POST;
+	}
+
+	/**
+	 * Append a key-value array to the $this->req request data.
+	 */
+	public function appendReqData(array $data){
+		$this->req = array_merge($this->req, $data);
 	}
 
 	public function setArgs(array $args){

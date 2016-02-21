@@ -83,7 +83,7 @@ class DatabaseController implements iDatabaseController{
 	 * @return FALSE on error, or an int representing the user's UID on success.
 	 */
 	public function registerNewUser($fullName,$email,$password){
-		$passwordHash = password_hash($password.PASSWORD_SALT, PASSWORD_BCRYPT, array("cost" => AUTH_HASH_COMPLEXITY));
+		$passwordHash = password_hash($password.PASSWORD_SALT, PASSWORD_BCRYPT, array("cost" => Config::authentication('hash_complexity')));
 		$nowDatetime = self::getSQLTimeStamp();
 		try{
 			$this->sqlCon()->beginTransaction(); //Registering a new user means a lot of different inserts, so we want to make sure either all or nothing occurs.
@@ -115,7 +115,7 @@ class DatabaseController implements iDatabaseController{
 	 * @return TRUE on successful update, FALSE otherwise.
 	 */
 	public function changeUserPassword($uid,$newPassword){
-		$passwordHash = password_hash($newPassword.PASSWORD_SALT, PASSWORD_BCRYPT, array('cost' => AUTH_HASH_COMPLEXITY));
+		$passwordHash = password_hash($newPassword.PASSWORD_SALT, PASSWORD_BCRYPT, array('cost' => Config::authentication('hash_complexity')));
 		try{
 			$updateQuery = $this->sqlCon()->prepare('UPDATE users SET password=:password WHERE uid=:uid');
 			$updateQuery->execute(array(':uid'=>$uid,':password'=>$passwordHash));

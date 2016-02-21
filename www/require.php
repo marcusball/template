@@ -2,6 +2,8 @@
 namespace pirrs;
 use \PDO;
 
+define('BASE_DIRECTORY',__DIR__);
+
 /** Functions and definitions that will be included for every page **/
 require 'config.php';
 
@@ -88,10 +90,12 @@ function typeIs($object, $type){
  * @return TRUE if file is included successfully, FALSE otherwise.
  */
 function includeFile($file){
-	$path = realpath(INCLUDE_PATH_PAGE_INCLUDE . $file);
+	$pageIncludePath = Config::core('include_path_page_include');
+
+	$path = realpath($pageIncludePath . $file);
 	if($path !== false && file_exists($path)){
 		//Make sure $path is a path INSIDE OF the include directory
-		if(stripos($path, INCLUDE_PATH_PAGE_INCLUDE) === 0){
+		if(stripos($path, $pageIncludePath) === 0){
 			RequestHandler::includePageFile($path,new NoPage());
 			return true;
 		}

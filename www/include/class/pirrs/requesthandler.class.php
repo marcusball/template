@@ -9,8 +9,8 @@ class RequestHandler{
 	 */
 	private static function getRequestScript($requested){
 		if($requested != null){
-			$includeFile = INCLUDE_PATH_PHP.$requested.INCLUDE_PHP_EXTENSION;
-			$templateFile = INCLUDE_PATH_TEMPLATE.$requested.INCLUDE_TEMPLATE_EXTENSION;
+			$includeFile = Config::core('include_path_php') . $requested . Config::core('include_php_extension');
+			$templateFile = Config::core('include_path_template') . $requested . Config::core('include_template_extension');
 
 			$hasPhp = file_exists($includeFile);
 			$hasTemplate = file_exists($templateFile);

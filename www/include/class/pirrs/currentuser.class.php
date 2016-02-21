@@ -101,7 +101,7 @@ class CurrentUser extends User{
 	}
 
 	private function sessionNotExpired(){
-		if(!isset($_SESSION['LAST_USE']) || time() - $_SESSION['LAST_USE'] >= SESSION_EXPIRATION_AGE){
+		if(!isset($_SESSION['LAST_USE']) || time() - $_SESSION['LAST_USE'] >= Config::user('session_expiration_age')){
 			return false;
 		}
 		return true;
