@@ -5,10 +5,22 @@ class RequestObject{
 	public $response;
 
 
-	protected $dbCon;
+  //Access provided through __get()
+	private $dbCon = null;
 
-  public function __construct(){
-      $this->dbCon = ResourceManager::getDatabaseController();
+  public function __construct(){}
+
+  public function __get($name) {
+    switch($name){
+      case 'dbCon':{
+        if($this->dbCon === null){
+          $this->dbCon = DatabaseController::get();
+        }
+        return $this->dbCon;
+      }
+      default:
+        return null;
+    }
   }
 
     /*
