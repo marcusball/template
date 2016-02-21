@@ -1,6 +1,7 @@
 <?php
 namespace pirrs;
 use \PDO;
+use \PDOException;
 
 class DatabaseController implements iDatabaseController{
 	private static $singletonConnectionPool;
