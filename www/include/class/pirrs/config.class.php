@@ -70,7 +70,7 @@ class Config{
    */
   public static function set(array $configKeys, $newValue){
     //Make sure a config key was given, to prevent overwriting entire configuration
-    if(count($configKey) > 0){
+    if(count($configKeys) > 0){
       $requestedVar = &self::$_config;
 
       //Recursively dive into configuration values
