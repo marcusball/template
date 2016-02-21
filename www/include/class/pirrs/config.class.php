@@ -59,6 +59,37 @@ class Config{
     return null;
   }
 
+  /**
+   * Overwrite an existing configuration value with a $newValue.
+   * @param $configKeys An array heirarchially stating which key should be changed,
+   *   with the highest level first, followed by the next highest level, until the
+   *   reaching the actual name of the configuration variable to be changed.
+   * @param $newValue The value which should be set
+   * @example To change the value of the "environment" config value within the "database"
+   *   configuration section, $configKeys should be array('database','environment').
+   */
+  public static function set(array $configKeys, $newValue){
+    //Make sure a config key was given, to prevent overwriting entire configuration
+    if(count($configKey) > 0){
+      $requestedVar = &self::$_config;
+
+      //Recursively dive into configuration values
+  		foreach($configKeys as $configKey){
+        if(isset($requestedVar[$configKey])){
+          $requestedVar = &$requestedVar[$configKey];
+        }
+        else{
+          $invalidVar = $implode('->',func_get_args());
+          Log::error('Invalid config variable \''.$invalidVar.'\'!');
+          throw new \Exception('Invalid config variable \''.$invalidVar.'\'!');
+        }
+  		}
+
+      //Assign the new value
+      $requestedVar = $newValue;
+    }
+  }
+
   private static function loadConfig($filename){
     self::$_config = parse_ini_file($filename, true, INI_SCANNER_TYPED);
   }
