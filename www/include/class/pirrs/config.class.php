@@ -22,28 +22,45 @@ class Config{
    */
   public static function __callStatic($name, $arguments){
     if(self::$_config === null){
-      self::loadConfig();
+      self::loadConfig(SERVER_INI_FILE);
     }
 
-    if(isset(self::$_config[$name])){
-      $requestedVar = self::$_config[$name];
-      if(count($arguments) > 0 && isset($requestedVar[$arguments[0]])){
-        $requestedVar = self::$_config[$name][$arguments[0]];
-      }
+    do{
+      if(isset(self::$_config[$name])){
+        $requestedVar = self::$_config[$name];
+        if(count($arguments) > 0){
+          //Will recursively dive into config arrays
+          foreach($arguments as $argument){
+            if(isset($requestedVar[$argument])){
+              $requestedVar = $requestedVar[$argument];
+            }
+            else{
+              //Someone asked for a config variable that doesn't exist!
+              //Break out of the while(false) loop
+              break 2;
+            }
+          }
+        }
 
-      if(is_string($requestedVar) || is_array($requestedVar)){
-        $requestedVar = str_replace(self::$baseDirReplace, BASE_DIRECTORY, $requestedVar);
+        if(is_string($requestedVar) || is_array($requestedVar)){
+          $requestedVar = str_replace(self::$baseDirReplace, BASE_DIRECTORY, $requestedVar);
+        }
+        return $requestedVar;
       }
-      return $requestedVar;
+    } while (false); //Executes body once, but enables "break" to fall through,
+
+    $invalidVar = $name;
+    if(count($arguments) > 0){
+      $invalidVar = $name . '->' . implode('->',$arguments);
     }
+    Log::error('Invalid config variable \''.$invalidVar.'\'!');
+    throw new \Exception('Invalid config variable \''.$invalidVar.'\'!');
 
-    Log::error('Invalid config variable \''.$name.'\'!');
-    throw new \Exception('Invalid config variable \''.$name.'\'!');
     return null;
   }
 
-  private static function loadConfig(){
-    self::$_config = parse_ini_file(SERVER_INI_FILE, true, INI_SCANNER_TYPED);
+  private static function loadConfig($filename){
+    self::$_config = parse_ini_file($filename, true, INI_SCANNER_TYPED);
   }
 }
 ?>

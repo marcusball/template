@@ -3,34 +3,104 @@ namespace pirrs;
 use \PDO;
 
 class DatabaseController implements iDatabaseController{
-	private $_sqlCon; //DO NOT ACCESS DIRECTLY! Use $this->sqlCon()
+	private static $singletonConnectionPool;
+
+	protected $_sqlCon; //DO NOT ACCESS DIRECTLY! Use $this->sqlCon()
 	// add other private database connections here
-	public function __construct(){
-	}
-	public function setPDOAttribute($attribute,$value){
-		return $this->sqlCon()->setAttribute($attribute,$value);
+
+
+	/***********************************************************/
+	/* Singleton / Construction methods                        */
+	/***********************************************************/
+
+	/**
+	 * Singleton access method. Will either return existing connection,
+	 *  or connect if no existing connection exists.
+	 * @param $environment The environment connection to be used
+	 *  ex: 'development', 'production', 'test'; These values must be
+	 *  be definined in config.ini. If null or empty, will use the
+	 *  config value Config::database('environment').
+	 */
+	public static function get($environment = ''){
+		if($environment === null || $environment === ''){
+			$environment = Config::database('environment');
+		}
+
+		//Check if the requested connection does not exist
+		if(!isset(self::$singletonConnectionPool[$environment])){
+			//If the configuration even permits database access
+			if(Config::database('enable') === true){
+				try {
+						$dbDriver = 	Config::database($environment, 'pdo_name');
+						$dbName = 		Config::database($environment, 'name');
+						$dbUser = 		Config::database($environment, 'user');
+						$dbPassword = Config::database($environment, 'password');
+						$dbHost = 		Config::database($environment, 'host');
+
+						$controller = new self();
+						$controller->_sqlCon = new PDO($dbDriver.':host='.$dbHost.';dbname='.$dbName, $dbUser, $dbPassword, null);
+						$controller->_sqlCon->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+						self::$singletonConnectionPool[$environment] = $controller;
+				}
+				catch(PDOException $e){
+						Log::error("Could not select database (".Config::database($environment, 'name').").",$e->getMessage(),time());
+						self::$singletonConnectionPool[$environment] = new NoDatabaseController();
+				}
+			}
+		}
+
+		return self::$singletonConnectionPool[$environment];
 	}
 
-	public static function getSQLTimeStamp($time = null){
-		if($time == null) $time = time();
-		return date('Y-m-d H:i:s',$time);
+
+	/**
+   * Protected constructor to prevent creating a new instance of the
+   * *Singleton* via the `new` operator from outside of this class.
+   */
+	protected function __construct(){}
+
+	/**
+	 * Private clone method to prevent cloning of the instance of the
+	 * *Singleton* instance.
+	 *
+	 * @return void
+	 */
+	private function __clone(){}
+
+	/**
+	 * Private unserialize method to prevent unserializing of the *Singleton*
+	 * instance.
+	 *
+	 * @return void
+	 */
+	private function __wakeup(){}
+
+	private function sqlCon(){
+		return $this->_sqlCon;
 	}
 
+	/***********************************************************/
+	/* Public access / utility functions                       */
+	/***********************************************************/
+
+	/**
+	 * Get a reference to the PDO connection object.
+	 */
 	public function getSQLConnection(){
 		return $this->sqlCon();
 	}
 
-	private function sqlCon(){
-		if($this->_sqlCon == null){
-			$this->_sqlCon = new PDO(DB_PDO_NAME.':host='.DB_HOST.';dbname='.DB_NAME, DB_USER, DB_PASSWORD, null);
-		}
-		return $this->_sqlCon;
-	}
-
-	/*
-	 * Add other private databaseConnect functions here
-	 * Return the connection object, then save to private member.
+	/**
+	 * Get a propertly formatted SQL timestamp.
+	 * @param $time If provided, timestamp will reflect the given time.
+	 *   If not provided, the output of `time()` will be used.
+	 * @return A SQL timestamp string.
 	 */
+	public static function getSQLTimeStamp($time = null){
+		if($time == null) $time = time();
+		return date('Y-m-d H:i:s',$time);
+	}
 
 	/***********************************************************/
 	/* DO NOT MODIFY THE CODE ABOVE THIS SECTION               */
