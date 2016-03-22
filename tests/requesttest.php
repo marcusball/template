@@ -133,4 +133,106 @@ public function testParsePathRootWithParams(){
       $makeRequestWithMethod('head');
       $makeRequestWithMethod(100);
     }
+
+    public function testValidUrlRewrite(){
+      $rewriteRules = array(
+        //Test the ability to navigate to site.com/some/other and be handled by 'test/file.php'
+        'test/file.php' => '^/some/other$'
+      );
+
+      Config::set(array('rewriterules'), $rewriteRules);
+
+      //Function to get the parsed file from a request url
+      $getUrlFilePath = function($requestUrl){
+        $request = Request::createRequest($requestUrl, '/', true);
+        return $request->getPath();
+      };
+
+      $this->assertEquals($getUrlFilePath('/some/other'), 'test/file');
+      $this->assertEquals($getUrlFilePath('/some/other/'), 'test/file');
+      $this->assertEquals($getUrlFilePath('/test/file.php'), 'test/file');
+
+      $this->assertNotEquals($getUrlFilePath('/some/other.php'), 'test/file');
+      $this->assertNotEquals($getUrlFilePath('/some/other.lol'), 'test/file');
+      $this->assertNotEquals($getUrlFilePath('/some/other.ph'), 'test/file');
+      $this->assertNotEquals($getUrlFilePath('/some/othertest'), 'test/file');
+
+      $this->assertNotEquals($getUrlFilePath('/test/file.lol'), 'test/file');
+      $this->assertNotEquals($getUrlFilePath('/test/file.ph'), 'test/file');
+      $this->assertNotEquals($getUrlFilePath('/test/filetest'), 'test/file');
+    }
+
+    public function testInvalidUrlRewriteSameBase(){
+      $rewriteRules = array(
+        //Test the ability to navigate to site.com/some/other and be handled by 'test/file.php'
+        'test/file.php' => '^/some/other$'
+      );
+
+      Config::set(array('rewriterules'), $rewriteRules);
+
+      //Function to get the parsed file from a request url
+      $getUrlFilePath = function($requestUrl){
+        $request = Request::createRequest($requestUrl, '/', true);
+        return $request->getPath();
+      };
+
+      $this->assertNotEquals($getUrlFilePath('/some/other.php'), 'test/file');
+      $this->assertNotEquals($getUrlFilePath('/some/other.lol'), 'test/file');
+      $this->assertNotEquals($getUrlFilePath('/some/other.ph'), 'test/file');
+      $this->assertNotEquals($getUrlFilePath('/some/othertest'), 'test/file');
+
+      $this->assertNotEquals($getUrlFilePath('/test/file.lol'), 'test/file');
+      $this->assertNotEquals($getUrlFilePath('/test/file.ph'), 'test/file');
+      $this->assertNotEquals($getUrlFilePath('/test/filetest'), 'test/file');
+    }
+
+    public function testInvalidUrlRewriteFileBase(){
+      $rewriteRules = array(
+        //Test the ability to navigate to site.com/some/other and be handled by 'test/file.php'
+        'test/file.php' => '^/some/other$'
+      );
+
+      Config::set(array('rewriterules'), $rewriteRules);
+
+      //Function to get the parsed file from a request url
+      $getUrlFilePath = function($requestUrl){
+        $request = Request::createRequest($requestUrl, '/', true);
+        return $request->getPath();
+      };
+
+      $this->assertNotEquals($getUrlFilePath('/test/file.lol'), 'test/file');
+      $this->assertNotEquals($getUrlFilePath('/test/file.ph'), 'test/file');
+      $this->assertNotEquals($getUrlFilePath('/test/filetest'), 'test/file');
+    }
+
+    public function testValidUrlRewriteForced(){
+      $rewriteRules = array(
+        //Test the ability to navigate to site.com/some/other and be handled by 'test/file.php'
+        'test/file.php' => '^/some/other$'
+      );
+
+      Config::set(array('rewriterules'), $rewriteRules);
+
+      //Function to get the parsed file from a request url
+      $getUrlFilePath = function($requestUrl){
+        $request = Request::createRequest($requestUrl, '/', true, true);
+        return $request->getPath();
+      };
+
+      $this->assertEquals($getUrlFilePath('/some/other'), 'test/file');
+      $this->assertEquals($getUrlFilePath('/some/other/'), 'test/file');
+    }
+
+    public function testInvalidUrlRewriteForced(){
+      $rewriteRules = array(
+        //Test the ability to navigate to site.com/some/other and be handled by 'test/file.php'
+        'test/file.php' => '^/some/other$'
+      );
+
+      Config::set(array('rewriterules'), $rewriteRules);
+
+
+      $request = Request::createRequest('/test/file.php', '/', true, true);
+      $this->assertFalse($request); //Noi found (because direct access is disallowed)
+    }
 } ?>

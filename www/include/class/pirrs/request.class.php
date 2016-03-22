@@ -122,10 +122,8 @@ class Request{
 		return $index;
 	}
 
-	public static function getRewritePath($path){
-		$REWRITE_RULES = Config::rewriterules(); //get rewrite rules from config.php
-
-		foreach($REWRITE_RULES as $file=>$rules){
+	public static function getRewritePath($path, $rewriteRules){
+		foreach($rewriteRules as $file=>$rules){
 			//For simplicity, if $rules is not an array, we're going to make it into one
 			if(!is_array($rules)){
 				$rules = array($rules);
@@ -178,7 +176,8 @@ class Request{
 		$requestArgs = array();
 
 		if($bEnableRewrite){
-			if(($rewrite = self::getRewritePath($path)) !== false){ //If this requested URL is being handled as a rewrite page
+			$rewriteRules = Config::rewriterules();
+			if(($rewrite = self::getRewritePath($path, $rewriteRules)) !== false){ //If this requested URL is being handled as a rewrite page
 				list($file,$groups) = $rewrite; //Get the file system file name , and the regex groups from the regex that matched this request.
 
 				$path = $file; //Update the request path with the file system file (as defined in $REWRITE_RULES in config.php).
