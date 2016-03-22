@@ -205,7 +205,7 @@ class Request{
 
 	private function readMethod(){
 		if(isset($_SERVER['REQUEST_METHOD'])){
-			$method = self::getMethodFromString($_SERVER['REQUEST_METHOD']);
+			return self::getMethodFromString($_SERVER['REQUEST_METHOD']);
 		}
 		return RequestMethod::GET;
 	}
