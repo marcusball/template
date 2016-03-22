@@ -13,14 +13,6 @@ class Request{
 	 */
 	protected $path;
 
-	private static $methodMap = array(
-		'GET' => RequestMethod::GET,
-		'POST' => RequestMethod::POST,
-		'PUT' => RequestMethod::PUT,
-		'PATCH' => RequestMethod::PUT,
-		'DELETE' => RequestMethod::DELETE
-	);
-
 	public function __construct(){
 		$this->args = array();
 		$this->method = $this->readMethod();
@@ -214,11 +206,7 @@ class Request{
 
 	private function readMethod(){
 		if(isset($_SERVER['REQUEST_METHOD'])){
-			$method = trim(strtoupper($_SERVER['REQUEST_METHOD']));
-
-			if(isset(self::$methodMap[$method])){
-				return self::$methodMap[$method];
-			}
+			$method = self::getMethodFromString($_SERVER['REQUEST_METHOD']);
 		}
 		return RequestMethod::GET;
 	}
@@ -231,6 +219,39 @@ class Request{
 			$this->method = $this->readMethod();
 		}
 		return $this->method;
+	}
+
+	/**
+	 * @return A tyto/RequestMethod valud from a string like 'GET' or 'POST',
+	 *   or FALSE on invalid input.
+	 * @note Currently, tyto/RequestMethod values are integers, so be careful
+	 *   of distinguishing between FALSE and 0.
+	 */
+	private static function getMethodFromString(string $method){
+		$method = trim(strtoupper($method));
+		if(RequestMethod::isValidName($method)){
+			return constant(RequestMethod::class . '::' . $method);
+		}
+		return false;
+	}
+
+	public function setMethod($method){
+		if(is_string($method) === true){
+			$method = self::getMethodFromString($method);
+			if($method !== false){
+				$this->method = $method;
+				return;
+			}
+		}
+		else{
+			if(RequestMethod::isValidValue($method)){
+				$this->method = $method;
+				return;
+			}
+		}
+
+		//If we've reached here, no valid method was given
+		throw new \InvalidArgumentException('Invalid method provided!');
 	}
 
 	public function isGet(){

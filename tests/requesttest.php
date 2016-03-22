@@ -89,4 +89,48 @@ public function testParsePathRootWithParams(){
         $this->assertEquals($request->getPath(), 'index');
       }
     }
+
+    public function testSetMethod(){
+      $makeRequestWithAndGetMethod = function($method){
+        $request = Request::createRequest('index.php', '/', false);
+        $request->setMethod($method);
+        return $request->getMethod();
+      };
+
+      $request = Request::createRequest('index.php', '/', false);
+      $this->assertEquals(RequestMethod::GET, $request->getMethod());
+
+      $this->assertEquals($makeRequestWithAndGetMethod('GET'), RequestMethod::GET);
+      $this->assertEquals($makeRequestWithAndGetMethod('get'), RequestMethod::GET);
+      $this->assertEquals($makeRequestWithAndGetMethod(RequestMethod::GET), RequestMethod::GET);
+
+      $this->assertEquals($makeRequestWithAndGetMethod('POST'), RequestMethod::POST);
+      $this->assertEquals($makeRequestWithAndGetMethod('post'), RequestMethod::POST);
+      $this->assertEquals($makeRequestWithAndGetMethod(RequestMethod::POST), RequestMethod::POST);
+
+      $this->assertEquals($makeRequestWithAndGetMethod('PUT'), RequestMethod::PUT);
+      $this->assertEquals($makeRequestWithAndGetMethod('put'), RequestMethod::PUT);
+      $this->assertEquals($makeRequestWithAndGetMethod(RequestMethod::PUT), RequestMethod::PUT);
+
+      $this->assertEquals($makeRequestWithAndGetMethod('PATCH'), RequestMethod::PUT);
+      $this->assertEquals($makeRequestWithAndGetMethod('patch'), RequestMethod::PUT);
+
+      $this->assertEquals($makeRequestWithAndGetMethod('DELETE'), RequestMethod::DELETE);
+      $this->assertEquals($makeRequestWithAndGetMethod('delete'), RequestMethod::DELETE);
+      $this->assertEquals($makeRequestWithAndGetMethod(RequestMethod::DELETE), RequestMethod::DELETE);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testInvalidSetMethod(){
+      $makeRequestWithMethod = function($method){
+        $request = Request::createRequest('index.php', '/', false);
+        $request->setMethod($method);
+        return $request;
+      };
+
+      $makeRequestWithMethod('head');
+      $makeRequestWithMethod(100);
+    }
 } ?>
