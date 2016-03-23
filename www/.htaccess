@@ -2,8 +2,7 @@ RewriteEngine On
 DirectoryIndex index.php
 
 RewriteRule ^server/.*$ index.php
+RewriteRule ^include/.*$ index.php
 RewriteRule ^page-(content|functions|include)/.*$ index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^(.*)$ index.php [QSA,L]
-
-
