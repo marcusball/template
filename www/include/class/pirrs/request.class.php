@@ -183,7 +183,7 @@ class Request{
 	 */
 	public static function createRequest($requestUri, $webrootDirectoy = '/', $bEnableRewrite = true, $bRewriteOnly = false){
 		//Just remember that, internally "bla.com/" will still be considered "bla.com/index.php" when checking the rewrite condition.
-		$path = self::parsePath($requestUri, $webrootDirectoy, true);
+		$path = self::parsePath($requestUri, $webrootDirectoy, false);
 		$requestArgs = array();
 
 		if($bEnableRewrite){
