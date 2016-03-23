@@ -47,7 +47,7 @@ class Request{
 
     //trim out the current file system directory, so we have a completely relative path to the requested file
     if($dirPos !== false){
-        $uri = '/' . trim( substr_replace($requestUri, '', $dirPos, strlen($uri)), '/' ); //Remove only the first occurrence of the current directory
+        $uri = substr_replace($requestUri, '', $dirPos, strlen($uri)); //Remove only the first occurrence of the current directory
         //http://stackoverflow.com/a/1252710/451726
     }
 
@@ -56,9 +56,20 @@ class Request{
 		if(!$withQueryArgs){
 			$matchVal = preg_match('#^(?\'path\'[^\?]*)(?:\?.*)?$#i',$uri,$matches);
 			if($matchVal !== 0 && $matchVal !== false){
-				return $matches['path'];
+				$uri = $matches['path'];
 			}
 		}
+
+		$totalReplacements = 0; //Mostly for logging purposes
+		do{
+			//Remove occurrences of two dots ('..') in an attempt to remove directory traversal
+			$uri = str_replace(array('..','//'), array('','/'), $uri, $replacements);
+			$uri = '/' . trim($uri, '/' );
+			$totalReplacements += $replacements;
+		} while ($replacements > 0); //Loop until no more things are removed
+
+		if($totalReplacements > 0){ Log::warning('Removed '.$totalReplacements.' occurrences of \'..\' or \'//\' sequences'); }
+
 		return $uri;
 	}
 

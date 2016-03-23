@@ -235,4 +235,23 @@ class RequestTest extends \PHPUnit_Framework_TestCase{
     $request = Request::createRequest('/test/file.php', '/', true, true);
     $this->assertFalse($request); //Noi found (because direct access is disallowed)
   }
+
+  public function testUrlRewriteWithGetParameters(){
+    $rewriteRules = array(
+      //Test the ability to navigate to site.com/some/other and be handled by 'test/file.php'
+      'test/file.php' => '^/some/other$'
+    );
+
+    Config::set(array('rewriterules'), $rewriteRules);
+
+    //Function to get the parsed file from a request url
+    $getUrlFilePath = function($requestUrl){
+      $request = Request::createRequest($requestUrl, '/', true);
+      return $request->getPath();
+    };
+
+    $this->assertEquals($getUrlFilePath('/some/other?hello=world'), 'test/file');
+    $this->assertEquals($getUrlFilePath('/some/other/?hello=world'), 'test/file');
+    $this->assertEquals($getUrlFilePath('/test/file.php?hello=world'), 'test/file');
+  }
 } ?>
