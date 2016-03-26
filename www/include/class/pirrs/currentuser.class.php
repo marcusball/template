@@ -39,6 +39,7 @@ class CurrentUser extends User{
      * Log a user in, with the credentials of user $uid.
      */
 	public function giveCredentials($uid){
+		$this->_isLoggedIn = true;
 		$_SESSION['USER_ID'] = $uid;
 		$_SESSION['LAST_USE'] = time();
 		$this->setClassCredentials($uid);
