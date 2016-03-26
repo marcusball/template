@@ -69,6 +69,10 @@ class Config{
    *   configuration section, $configKeys should be array('database','environment').
    */
   public static function set(array $configKeys, $newValue){
+    if(self::$_config === null){
+      self::loadConfig(SERVER_INI_FILE);
+    }
+
     //Make sure a config key was given, to prevent overwriting entire configuration
     if(count($configKeys) > 0){
       $requestedVar = &self::$_config;
@@ -79,7 +83,7 @@ class Config{
           $requestedVar = &$requestedVar[$configKey];
         }
         else{
-          $invalidVar = $implode('->',func_get_args());
+          $invalidVar = implode('->',$configKeys);
           Log::error('Invalid config variable \''.$invalidVar.'\'!');
           throw new \Exception('Invalid config variable \''.$invalidVar.'\'!');
         }
