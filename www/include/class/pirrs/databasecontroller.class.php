@@ -45,7 +45,7 @@ class DatabaseController implements iDatabaseController{
 						self::$singletonConnectionPool[$environment] = $controller;
 				}
 				catch(PDOException $e){
-						Log::error("Could not select database (".Config::database($environment, 'name').").",$e->getMessage(),time());
+						Log::error("Could not select database (".Config::database($environment, 'name').").",$e->getMessage());
 						self::$singletonConnectionPool[$environment] = new NoDatabaseController();
 				}
 			}
